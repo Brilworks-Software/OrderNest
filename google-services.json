@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1036400538579",
+    "project_id": "ordernest-8da3a",
+    "storage_bucket": "ordernest-8da3a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036400538579:android:566fee74b6fec1ddfe7526",
+        "android_client_info": {
+          "package_name": "com.brilworks.orderNext"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIJJgSLz-X1wTVdamTnzYEJQp5bNJvOW4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
