@@ -6,9 +6,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  TouchableWithoutFeedback,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export type Table = {
   id: string;
@@ -38,6 +40,7 @@ const TableModal: React.FC<TableModalProps> = ({
   );
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<boolean>(false);
 
   const isEditMode = !!table;
 
@@ -93,82 +96,118 @@ const TableModal: React.FC<TableModalProps> = ({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="fade"
       onRequestClose={onClose}
-      style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
     >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.overlay} />
-      </TouchableWithoutFeedback>
-
-      <View style={styles.modalContainer}>
-        <Text style={styles.header}>
-          {isEditMode ? 'Edit Table' : 'Add New Table'}
-        </Text>
-
-        <Text style={styles.label}>Table Number</Text>
-        <TextInput
-          style={styles.input}
-          value={tableNumber}
-          onChangeText={(t) => {
-            setTableNumber(t);
-            if (errorMessage) setErrorMessage('');
-          }}
-          keyboardType="number-pad"
-          placeholder="Enter table number"
-        />
-
-        {errorMessage ? (
-          <Text style={styles.errorText}>{errorMessage}</Text>
-        ) : null}
-
-        {/* <Text style={styles.label}>Status</Text>
-        <View style={styles.statusContainer}>
-          {['available', 'occupied', 'reserved'].map((s) => (
-            <TouchableOpacity
-              key={s}
-              style={[
-                styles.statusButton,
-                status === s && styles.statusButtonActive,
-              ]}
-              onPress={() => setStatus(s as any)}
-            >
-              <Text
-                style={[
-                  styles.statusText,
-                  status === s && styles.statusTextActive,
-                ]}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            {/* Header */}
+            <View style={styles.modalHeader}>
+              <View style={styles.headerContent}>
+                <Ionicons 
+                  name="grid-outline" 
+                  size={24} 
+                  color="#007AFF" 
+                  style={styles.headerIcon} 
+                />
+                <Text style={styles.modalTitle}>
+                  {isEditMode ? 'Edit Table' : 'Add New Table'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={onClose}
+                disabled={loading}
               >
-                {s}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View> */}
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
 
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={[styles.button, styles.saveButton, loading && styles.disabled]}
-            onPress={handleSave}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>
-                {isEditMode ? 'Update' : 'Create'}
-              </Text>
-            )}
-          </TouchableOpacity>
+            {/* Form Content */}
+            <View style={styles.formContent}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Table Number</Text>
+                <View style={[
+                  styles.inputContainer,
+                  focusedInput && styles.inputContainerFocused,
+                  errorMessage && styles.inputContainerError
+                ]}>
+                  <Ionicons 
+                    name="grid-outline" 
+                    size={20} 
+                    color={focusedInput ? '#007AFF' : '#999'} 
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    value={tableNumber}
+                    onChangeText={(t) => {
+                      setTableNumber(t);
+                      if (errorMessage) setErrorMessage('');
+                    }}
+                    keyboardType="number-pad"
+                    placeholder="Enter table number"
+                    placeholderTextColor="#999"
+                    editable={!loading}
+                  />
+                </View>
+              </View>
 
-          <TouchableOpacity
-            style={[styles.button, styles.cancelButton]}
-            onPress={onClose}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
+              {errorMessage && (
+                <View style={styles.errorContainer}>
+                  <Ionicons name="alert-circle" size={18} color="#ff4444" />
+                  <Text style={styles.errorText}>{errorMessage}</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Actions */}
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[
+                  styles.modalButton,
+                  styles.cancelButton,
+                  loading && styles.buttonDisabled
+                ]}
+                onPress={onClose}
+                disabled={loading}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.modalButton,
+                  styles.saveButton,
+                  loading && styles.buttonDisabled
+                ]}
+                onPress={handleSave}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons 
+                      name={isEditMode ? "checkmark-circle" : "add-circle"} 
+                      size={20} 
+                      color="#fff" 
+                      style={styles.buttonIcon} 
+                    />
+                    <Text style={styles.saveButtonText}>
+                      {isEditMode ? 'Update' : 'Create'}
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -176,87 +215,174 @@ const TableModal: React.FC<TableModalProps> = ({
 export default TableModal;
 
 const styles = StyleSheet.create({
-  overlay: {
+  keyboardAvoidingView: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
   },
   modalContainer: {
-    position: 'absolute',
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    elevation: 6,
-    // maxWidth: 700,
-    alignSelf: 'center',
-    top: '30%',
+    borderRadius: 20,
+    width: '100%',
+    maxWidth: 480,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+    overflow: 'hidden',
   },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  headerIcon: {
+    marginRight: 12,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#1a1a1a',
+    letterSpacing: -0.5,
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  formContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
+  },
+  inputGroup: {
+    marginBottom: 16,
   },
   label: {
+    fontSize: 14,
     fontWeight: '600',
-    color: '#444',
-    marginBottom: 6,
+    marginBottom: 10,
+    color: '#333',
+    letterSpacing: 0.2,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    backgroundColor: '#fafafa',
+    paddingHorizontal: 4,
+    minHeight: 52,
+  },
+  inputContainerFocused: {
+    borderColor: '#007AFF',
+    backgroundColor: '#fff',
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputContainerError: {
+    borderColor: '#ff4444',
+  },
+  inputIcon: {
+    marginLeft: 12,
+    marginRight: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    fontSize: 16,
+    color: '#333',
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff5f5',
+    padding: 12,
     borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ffebee',
+    gap: 8,
+    marginTop: 4,
   },
   errorText: {
-    color: '#c0392b',
-    marginBottom: 12,
-    textAlign: 'center',
+    color: '#ff4444',
+    fontSize: 14,
+    fontWeight: '500',
+    flex: 1,
   },
-  statusContainer: {
+  modalActions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  statusButton: {
-    borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  statusButtonActive: {
-    backgroundColor: '#3498DB',
-    borderColor: '#3498DB',
-  },
-  statusText: {
-    color: '#555',
-  },
-  statusTextActive: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  button: {
-    paddingVertical: 10,
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    borderRadius: 8,
+    paddingTop: 16,
+    paddingBottom: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    gap: 12,
   },
-  saveButton: {
-    backgroundColor: '#27AE60',
+  modalButton: {
+    flex: 1,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    minHeight: 52,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   cancelButton: {
-    backgroundColor: '#7F8C8D',
+    backgroundColor: '#f5f5f5',
   },
-  buttonText: {
-    color: '#fff',
+  cancelButtonText: {
+    color: '#333',
+    fontSize: 16,
     fontWeight: '600',
   },
-  disabled: {
-    opacity: 0.7,
+  saveButton: {
+    backgroundColor: '#007AFF',
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  buttonIcon: {
+    marginRight: -4,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

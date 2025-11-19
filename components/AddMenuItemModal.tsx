@@ -11,6 +11,7 @@ import {
     Image,
     Alert,
     Platform,
+    KeyboardAvoidingView,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useUploadImage } from '../firebase/hooks/useImageUpload' // added
@@ -202,9 +203,14 @@ export default function AddMenuItemModal({
 
     return (
         <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-            <View style={localStyles.modalContainer}>
-                <View style={localStyles.modalContent}>
-                    <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+            <KeyboardAvoidingView 
+                style={{ flex: 1 }} 
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <View style={localStyles.modalContainer}>
+                    <View style={localStyles.modalContent}>
+                        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
                         <Text style={localStyles.header}>{isEdit ? 'Edit Menu Item' : 'Add Menu Item'}</Text>
 
                         <Text style={localStyles.label}>Name</Text>
@@ -259,6 +265,7 @@ export default function AddMenuItemModal({
                     </ScrollView>
                 </View>
             </View>
+            </KeyboardAvoidingView>
         </Modal>
     )
 }

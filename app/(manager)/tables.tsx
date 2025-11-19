@@ -217,10 +217,10 @@ export default function Tables() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <View style={styles.headerContainer}>
+        {/* <View style={styles.headerContainer}>
           <Text style={styles.header}>Tables</Text>
           <Text style={styles.subHeader}>{statusCounts.total} total</Text>
-        </View>
+        </View> */}
 
         {/* Status Summary Cards */}
         <View style={styles.summaryContainer}>

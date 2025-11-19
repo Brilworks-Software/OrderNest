@@ -152,7 +152,11 @@ export default function OrderDetailsModal({
             </View>
           </View>
 
-          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <ScrollView 
+            style={styles.scrollView} 
+            contentContainerStyle={styles.scrollViewContent}
+            showsVerticalScrollIndicator={false}
+          >
             {/* Pending Items */}
             {pendingItems.length > 0 && (
               <View style={styles.section}>
@@ -296,8 +300,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: '90%',
-    paddingBottom: 20,
+    minHeight: '90%',
+    flexDirection: 'column',
   },
   header: {
     flexDirection: 'row',
@@ -306,6 +310,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+    flexShrink: 0,
   },
   headerLeft: {
     flex: 1,
@@ -338,6 +343,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+    flexShrink: 0,
   },
   infoRow: {
     flexDirection: 'row',
@@ -367,6 +373,11 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+  },
+  scrollViewContent: {
+    paddingBottom: 20,
   },
   section: {
     padding: 20,

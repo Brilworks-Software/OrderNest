@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, Switch, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Switch, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMenuItems, useUpdateMenuItem } from '@/firebase/hooks/useMenuItem';
 import { useAuth } from '@/firebase/hooks/useAuth';
@@ -13,25 +13,45 @@ export default function MenuItems() {
   const restaurantId = userData?.restaurantId || '';
   const { data: items, isLoading } = useMenuItems(restaurantId);
   const update = useUpdateMenuItem();
+  const [togglingItems, setTogglingItems] = useState<Set<string>>(new Set());
 
   const toggleAvailability = (id: string) => {
+    // Prevent rapid toggling
+    if (togglingItems.has(id) || update.isPending) return;
+    
     const item = items?.find(i => i.id === id);
     if (!item) return;
-    update.mutate({ menuItemId: id, updates: { available: !item.available } });
+    
+    setTogglingItems(prev => new Set(prev).add(id));
+    update.mutate(
+      { menuItemId: id, updates: { available: !item.available } },
+      {
+        onSettled: () => {
+          setTogglingItems(prev => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        },
+      }
+    );
   };
 
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
+    const isToggling = togglingItems.has(item.id);
+    const isUnavailable = !item.available;
+    
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, isUnavailable && styles.unavailableCard]}>
         <View style={styles.imageContainer}>
           {item.image_url ? (
             <Image
               source={{ uri: item.image_url }}
-              style={styles.image}
+              style={[styles.image, isUnavailable && styles.unavailableImage]}
               resizeMode="cover"
             />
           ) : (
-            <View style={styles.imagePlaceholder}>
+            <View style={[styles.imagePlaceholder, isUnavailable && styles.unavailableImage]}>
               <MaterialIcons name="restaurant-menu" size={32} color="#abb5c3" />
             </View>
           )}
@@ -43,29 +63,52 @@ export default function MenuItems() {
         </View>
         <View style={styles.info}>
           <View style={styles.headerRow}>
-            <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+            <View style={styles.nameContainer}>
+              <Text style={[styles.name, isUnavailable && styles.unavailableName]} numberOfLines={1}>
+                {item.name}
+              </Text>
+              {isUnavailable && (
+                <View style={styles.unavailableBadge}>
+                  <Text style={styles.unavailableBadgeText}>Unavailable</Text>
+                </View>
+              )}
+            </View>
+            <TouchableOpacity
+              style={[styles.toggleContainer, isToggling && styles.toggleContainerDisabled]}
+              onPress={() => toggleAvailability(item.id)}
+              disabled={isToggling}
+              activeOpacity={0.7}
+            >
+              {isToggling ? (
+                <ActivityIndicator size="small" color="#104A9c" />
+              ) : (
+                <Switch
+                  value={item.available}
+                  onValueChange={() => toggleAvailability(item.id)}
+                  trackColor={{ false: '#fee2e2', true: '#dbeafe' }}
+                  thumbColor={item.available ? '#104A9c' : '#ef4444'}
+                  ios_backgroundColor="#fee2e2"
+                  disabled={isToggling}
+                />
+              )}
+            </TouchableOpacity>
           </View>
           {item.description ? (
-            <Text style={styles.desc} numberOfLines={2}>{item.description}</Text>
+            <Text style={[styles.desc, isUnavailable && styles.unavailableDesc]} numberOfLines={2}>
+              {item.description}
+            </Text>
           ) : null}
           <View style={styles.footerRow}>
             <View style={styles.priceContainer}>
-              <Text style={styles.price}>₹{item.price.toFixed(2)}</Text>
+              <Text style={[styles.price, isUnavailable && styles.unavailablePrice]}>
+                ₹{item.price.toFixed(2)}
+              </Text>
             </View>
             <View style={styles.availabilityContainer}>
               <View style={[styles.statusIndicator, item.available ? styles.availableIndicator : styles.unavailableIndicator]} />
               <Text style={[styles.availText, !item.available && styles.unavailableText]}>
                 {item.available ? 'Available' : 'Unavailable'}
               </Text>
-              <View style={{ marginLeft: 6 }}>
-                <Switch
-                  value={item.available}
-                  onValueChange={() => toggleAvailability(item.id)}
-                  trackColor={{ false: '#DFE0ED', true: '#104A9c' }}
-                  thumbColor={item.available ? '#fff' : '#f4f3f4'}
-                  ios_backgroundColor="#DFE0ED"
-                />
-              </View>
             </View>
           </View>
         </View>
@@ -161,6 +204,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  unavailableCard: {
+    backgroundColor: '#fafafa',
+    opacity: 0.95,
+  },
   imageContainer: {
     position: 'relative',
   },
@@ -169,6 +216,9 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 12,
     backgroundColor: '#f0f0f0',
+  },
+  unavailableImage: {
+    opacity: 0.6,
   },
   imagePlaceholder: {
     width: 100,
@@ -204,17 +254,52 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 4,
   },
+  nameContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginRight: 8,
+  },
   name: {
     fontSize: 18,
     fontWeight: '700',
     color: '#1a1a1a',
-    flex: 1,
+    flexShrink: 1,
+  },
+  unavailableName: {
+    color: '#6b7280',
+  },
+  unavailableBadge: {
+    backgroundColor: '#fee2e2',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginLeft: 6,
+  },
+  unavailableBadgeText: {
+    color: '#ef4444',
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  toggleContainer: {
+    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 50,
+  },
+  toggleContainerDisabled: {
+    opacity: 0.6,
   },
   desc: {
     fontSize: 13,
     color: '#6b7280',
     lineHeight: 18,
     marginBottom: 8,
+  },
+  unavailableDesc: {
+    color: '#9ca3af',
   },
   footerRow: {
     flexDirection: 'row',
@@ -232,6 +317,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#104A9c',
+  },
+  unavailablePrice: {
+    color: '#9ca3af',
   },
   availabilityContainer: {
     flexDirection: 'row',

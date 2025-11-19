@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -33,6 +33,10 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  
+  // Blur timeout ref to prevent immediate blur
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
   const { currentUser, isLoadingUser } = useAuth();
   const uploadMutation = useUploadImage();
   const createRestaurantMutation = useCreateRestaurant();
@@ -204,10 +208,13 @@ export default function Onboarding() {
           <View style={styles.card}>
             <View>
               <Text style={styles.label}>Restaurant Name</Text>
-              <View style={[
-                styles.inputContainer,
-                focusedInput === 'name' && styles.inputContainerFocused
-              ]}>
+              <View 
+                style={[
+                  styles.inputContainer,
+                  focusedInput === 'name' && styles.inputContainerFocused
+                ]}
+                pointerEvents="box-none"
+              >
                 <Ionicons 
                   name="restaurant" 
                   size={20} 
@@ -220,19 +227,21 @@ export default function Onboarding() {
                   onChangeText={setName}
                   placeholder="Enter restaurant name"
                   placeholderTextColor="#9ca3af"
-                  onFocus={() => setFocusedInput('name')}
-                  onBlur={() => setFocusedInput(null)}
                   editable={!loading}
+                  returnKeyType="next"
                 />
               </View>
             </View>
 
             <View>
               <Text style={styles.label}>Address</Text>
-              <View style={[
-                styles.inputContainer,
-                focusedInput === 'address' && styles.inputContainerFocused
-              ]}>
+              <View 
+                style={[
+                  styles.inputContainer,
+                  focusedInput === 'address' && styles.inputContainerFocused
+                ]}
+                pointerEvents="box-none"
+              >
                 <Ionicons 
                   name="location" 
                   size={20} 
@@ -248,19 +257,21 @@ export default function Onboarding() {
                   multiline
                   numberOfLines={3}
                   textAlignVertical="top"
-                  onFocus={() => setFocusedInput('address')}
-                  onBlur={() => setFocusedInput(null)}
                   editable={!loading}
+                  returnKeyType="next"
                 />
               </View>
             </View>
 
             <View>
               <Text style={styles.label}>GST Number</Text>
-              <View style={[
-                styles.inputContainer,
-                focusedInput === 'gstNumber' && styles.inputContainerFocused
-              ]}>
+              <View 
+                style={[
+                  styles.inputContainer,
+                  focusedInput === 'gstNumber' && styles.inputContainerFocused
+                ]}
+                pointerEvents="box-none"
+              >
                 <Ionicons 
                   name="document-text" 
                   size={20} 
@@ -273,9 +284,8 @@ export default function Onboarding() {
                   onChangeText={setGstNumber}
                   placeholder="Enter GST number"
                   placeholderTextColor="#9ca3af"
-                  onFocus={() => setFocusedInput('gstNumber')}
-                  onBlur={() => setFocusedInput(null)}
                   editable={!loading}
+                  returnKeyType="next"
                 />
               </View>
             </View>
@@ -283,10 +293,13 @@ export default function Onboarding() {
             <View style={styles.row}>
               <View style={styles.halfWidth}>
                 <Text style={styles.label}>GST Percentage</Text>
-                <View style={[
-                  styles.inputContainer,
-                  focusedInput === 'gstPercentage' && styles.inputContainerFocused
-                ]}>
+                <View 
+                  style={[
+                    styles.inputContainer,
+                    focusedInput === 'gstPercentage' && styles.inputContainerFocused
+                  ]}
+                  pointerEvents="box-none"
+                >
                   <Ionicons 
                     name="calculator" 
                     size={20} 
@@ -300,19 +313,21 @@ export default function Onboarding() {
                     placeholder="e.g. 18"
                     placeholderTextColor="#9ca3af"
                     keyboardType="numeric"
-                    onFocus={() => setFocusedInput('gstPercentage')}
-                    onBlur={() => setFocusedInput(null)}
                     editable={!loading}
+                    returnKeyType="next"
                   />
                 </View>
               </View>
 
               <View style={styles.halfWidth}>
                 <Text style={styles.label}>Service Charge (%)</Text>
-                <View style={[
-                  styles.inputContainer,
-                  focusedInput === 'serviceCharge' && styles.inputContainerFocused
-                ]}>
+                <View 
+                  style={[
+                    styles.inputContainer,
+                    focusedInput === 'serviceCharge' && styles.inputContainerFocused
+                  ]}
+                  pointerEvents="box-none"
+                >
                   <Ionicons 
                     name="card" 
                     size={20} 
@@ -326,9 +341,8 @@ export default function Onboarding() {
                     placeholder="e.g. 5"
                     placeholderTextColor="#9ca3af"
                     keyboardType="numeric"
-                    onFocus={() => setFocusedInput('serviceCharge')}
-                    onBlur={() => setFocusedInput(null)}
                     editable={!loading}
+                    returnKeyType="done"
                   />
                 </View>
               </View>

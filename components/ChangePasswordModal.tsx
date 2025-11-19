@@ -9,6 +9,8 @@ import {
     ActivityIndicator,
     Alert,
     ScrollView,
+    KeyboardAvoidingView,
+    Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -95,8 +97,13 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             transparent={true}
             onRequestClose={handleClose}
         >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalContainer}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.keyboardAvoidingView}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
                     {/* Header */}
                     <View style={styles.modalHeader}>
                         <View style={styles.headerContent}>
@@ -141,7 +148,6 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         secureTextEntry={!showCurrentPassword}
                                         autoCapitalize="none"
                                         editable={!isUpdatingPassword && !isReauthenticating}
-                                        onFocus={() => setFocusedInput('current')}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                     <TouchableOpacity
@@ -181,7 +187,6 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         secureTextEntry={!showNewPassword}
                                         autoCapitalize="none"
                                         editable={!isUpdatingPassword && !isReauthenticating}
-                                        onFocus={() => setFocusedInput('new')}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                     <TouchableOpacity
@@ -241,7 +246,6 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         secureTextEntry={!showConfirmPassword}
                                         autoCapitalize="none"
                                         editable={!isUpdatingPassword && !isReauthenticating}
-                                        onFocus={() => setFocusedInput('confirm')}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                     <TouchableOpacity
@@ -305,8 +309,9 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             )}
                         </TouchableOpacity>
                     </View>
+                    </View>
                 </View>
-            </View>
+            </KeyboardAvoidingView>
         </Modal>
     );
 };
@@ -314,6 +319,9 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 export default ChangePasswordModal;
 
 const styles = StyleSheet.create({
+    keyboardAvoidingView: {
+        flex: 1,
+    },
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.6)',

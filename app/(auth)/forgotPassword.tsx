@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ActivityIndicator, Platform, KeyboardAvoidingView, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useAuth } from '../../firebase/hooks/useAuth'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
@@ -12,6 +12,12 @@ export default function ForgotPassword() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [focusedInput, setFocusedInput] = useState(false)
   const router = useRouter()
+  
+  // Refs for input fields
+  const emailInputRef = useRef<TextInput>(null)
+  
+  // Blur timeout ref to prevent immediate blur
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { resetPassword, isResettingPassword, resetPasswordError } = useAuth()
 
@@ -63,10 +69,13 @@ export default function ForgotPassword() {
           <View style={styles.card}>
             <View>
               <Text style={styles.label}>Email Address</Text>
-              <View style={[
-                styles.inputContainer,
-                focusedInput && styles.inputContainerFocused
-              ]}>
+              <View 
+                style={[
+                  styles.inputContainer,
+                  focusedInput && styles.inputContainerFocused
+                ]}
+                pointerEvents="box-none"
+              >
                 <Ionicons 
                   name="mail" 
                   size={20} 
@@ -74,6 +83,7 @@ export default function ForgotPassword() {
                   style={styles.icon} 
                 />
                 <TextInput
+                  ref={emailInputRef}
                   style={styles.input}
                   placeholder="Enter your email"
                   placeholderTextColor="#9ca3af"
@@ -89,8 +99,6 @@ export default function ForgotPassword() {
                   returnKeyType="send"
                   onSubmitEditing={handleResetPassword}
                   editable={!isResettingPassword}
-                  onFocus={() => setFocusedInput(true)}
-                  onBlur={() => setFocusedInput(false)}
                 />
               </View>
             </View>

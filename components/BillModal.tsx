@@ -150,11 +150,13 @@ export default function BillModal({
           status: 'available',
         });
 
-        // Update order status to completed
-        await updateOrderStatusMutation.mutateAsync({
-          orderId: order.id,
-          status: 'completed',
-        });
+        // Only update order status if it's not already completed
+        if (order.status !== 'completed') {
+          await updateOrderStatusMutation.mutateAsync({
+            orderId: order.id,
+            status: 'completed',
+          });
+        }
       }
 
       onClose();
@@ -175,22 +177,39 @@ export default function BillModal({
       });
       setPaymentStatus(newStatus);
 
-      // When bill is paid, mark table as free and order as completed
+      // Update order status based on payment status
       if (newStatus === 'Paid') {
-        // Update table status to available (free)
+        // When bill is paid, mark table as free and order as completed
         await updateTableStatusMutation.mutateAsync({
           tableId: order.table_id,
           status: 'available',
         });
 
         // Update order status to completed
-        await updateOrderStatusMutation.mutateAsync({
-          orderId: order.id,
-          status: 'completed',
+        if (order.status !== 'completed') {
+          await updateOrderStatusMutation.mutateAsync({
+            orderId: order.id,
+            status: 'completed',
+          });
+        }
+      } else if (newStatus === 'Pending' || newStatus === 'Failed') {
+        // When payment is Pending or Failed, revert order status to pending
+        // and mark table as occupied
+        await updateTableStatusMutation.mutateAsync({
+          tableId: order.table_id,
+          status: 'occupied',
         });
+
+        // Update order status to pending
+        if (order.status !== 'pending') {
+          await updateOrderStatusMutation.mutateAsync({
+            orderId: order.id,
+            status: 'pending',
+          });
+        }
       }
     } catch (error) {
-      console.error('Error updating payment status:', error);
+      console.error('Error updating payment status:', error); 
     }
   };
 
@@ -428,7 +447,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: '90%',
+    minHeight: '90%',
     paddingBottom: 20,
   },
   modalHeader: {
@@ -460,6 +479,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     paddingHorizontal: 20,
+    
   },
   restaurantInfo: {
     paddingVertical: 20,

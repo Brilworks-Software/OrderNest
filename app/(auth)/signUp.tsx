@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -31,6 +31,14 @@ export default function SignUp() {
   
   // Focus states for better UX
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  
+  // Refs for input fields
+  const emailInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+  const confirmPasswordInputRef = useRef<TextInput>(null);
+  
+  // Blur timeout ref to prevent immediate blur
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSignUp = async () => {
     setError(null);
@@ -93,10 +101,13 @@ export default function SignUp() {
           </View>
 
           <View style={styles.card}>
-            <View style={[
-              styles.inputContainer,
-              focusedInput === 'email' && styles.inputContainerFocused
-            ]}>
+            <View 
+              style={[
+                styles.inputContainer,
+                focusedInput === 'email' && styles.inputContainerFocused
+              ]}
+              pointerEvents="box-none"
+            >
               <Ionicons 
                 name="mail" 
                 size={20} 
@@ -104,6 +115,7 @@ export default function SignUp() {
                 style={styles.icon} 
               />
               <TextInput
+                ref={emailInputRef}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -112,16 +124,19 @@ export default function SignUp() {
                 placeholderTextColor="#9ca3af"
                 style={styles.input}
                 editable={!isSigningUp}
-                onFocus={() => setFocusedInput('email')}
-                onBlur={() => setFocusedInput(null)}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordInputRef.current?.focus()}
                 accessibilityLabel="Email input"
               />
             </View>
 
-            <View style={[
-              styles.inputContainer,
-              focusedInput === 'password' && styles.inputContainerFocused
-            ]}>
+            <View 
+              style={[
+                styles.inputContainer,
+                focusedInput === 'password' && styles.inputContainerFocused
+              ]}
+              pointerEvents="box-none"
+            >
               <Ionicons 
                 name="lock-closed" 
                 size={20} 
@@ -129,6 +144,7 @@ export default function SignUp() {
                 style={styles.icon} 
               />
               <TextInput
+                ref={passwordInputRef}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -136,15 +152,19 @@ export default function SignUp() {
                 placeholderTextColor="#9ca3af"
                 style={styles.input}
                 editable={!isSigningUp}
-                onFocus={() => setFocusedInput('password')}
-                onBlur={() => setFocusedInput(null)}
+                returnKeyType="next"
+                onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
                 accessibilityLabel="Password input"
               />
               <TouchableOpacity
-                onPress={() => setShowPassword((s) => !s)}
+                onPress={() => {
+                  setShowPassword((s) => !s);
+                  setTimeout(() => passwordInputRef.current?.focus(), 100);
+                }}
                 style={styles.rightIcon}
                 accessibilityRole="button"
                 accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                activeOpacity={0.7}
               >
                 <Ionicons 
                   name={showPassword ? 'eye' : 'eye-off'} 
@@ -154,10 +174,13 @@ export default function SignUp() {
               </TouchableOpacity>
             </View>
 
-            <View style={[
-              styles.inputContainer,
-              focusedInput === 'confirmPassword' && styles.inputContainerFocused
-            ]}>
+            <View 
+              style={[
+                styles.inputContainer,
+                focusedInput === 'confirmPassword' && styles.inputContainerFocused
+              ]}
+              pointerEvents="box-none"
+            >
               <Ionicons 
                 name="lock-closed" 
                 size={20} 
@@ -165,6 +188,7 @@ export default function SignUp() {
                 style={styles.icon} 
               />
               <TextInput
+                ref={confirmPasswordInputRef}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
@@ -172,15 +196,19 @@ export default function SignUp() {
                 placeholderTextColor="#9ca3af"
                 style={styles.input}
                 editable={!isSigningUp}
-                onFocus={() => setFocusedInput('confirmPassword')}
-                onBlur={() => setFocusedInput(null)}
+                returnKeyType="done"
+                onSubmitEditing={handleSignUp}
                 accessibilityLabel="Confirm password input"
               />
               <TouchableOpacity
-                onPress={() => setShowConfirmPassword((s) => !s)}
+                onPress={() => {
+                  setShowConfirmPassword((s) => !s);
+                  setTimeout(() => confirmPasswordInputRef.current?.focus(), 100);
+                }}
                 style={styles.rightIcon}
                 accessibilityRole="button"
                 accessibilityLabel={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                activeOpacity={0.7}
               >
                 <Ionicons 
                   name={showConfirmPassword ? 'eye' : 'eye-off'} 

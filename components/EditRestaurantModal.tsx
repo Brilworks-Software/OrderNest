@@ -9,6 +9,8 @@ import {
     ScrollView,
     ActivityIndicator,
     Alert,
+    KeyboardAvoidingView,
+    Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Restaurant } from '@/firebase/types';
@@ -101,12 +103,17 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
     return (
         <Modal
             visible={visible}
-            animationType="slide"
+            animationType="fade"
             transparent={true}
             onRequestClose={onClose}
         >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalContainer}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.keyboardAvoidingView}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
                     {/* Header */}
                     <View style={styles.modalHeader}>
                         <View style={styles.headerContent}>
@@ -149,7 +156,6 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                         value={restaurantName}
                                         onChangeText={setRestaurantName}
                                         editable={!updateRestaurantMutation.isPending}
-                                        onFocus={() => setFocusedInput('name')}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                 </View>
@@ -179,7 +185,6 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                         multiline
                                         numberOfLines={3}
                                         editable={!updateRestaurantMutation.isPending}
-                                        onFocus={() => setFocusedInput('address')}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                 </View>
@@ -206,7 +211,6 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                         value={gstNumber}
                                         onChangeText={setGstNumber}
                                         editable={!updateRestaurantMutation.isPending}
-                                        onFocus={() => setFocusedInput('gstNumber')}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                 </View>
@@ -234,7 +238,6 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                         onChangeText={setGstPercentage}
                                         keyboardType="numeric"
                                         editable={!updateRestaurantMutation.isPending}
-                                        onFocus={() => setFocusedInput('gstPercentage')}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                 </View>
@@ -262,7 +265,6 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                         onChangeText={setServiceCharge}
                                         keyboardType="numeric"
                                         editable={!updateRestaurantMutation.isPending}
-                                        onFocus={() => setFocusedInput('serviceCharge')}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                 </View>
@@ -309,8 +311,9 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                             )}
                         </TouchableOpacity>
                     </View>
+                    </View>
                 </View>
-            </View>
+            </KeyboardAvoidingView>
         </Modal>
     );
 };
@@ -318,22 +321,28 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
 export default EditRestaurantModal;
 
 const styles = StyleSheet.create({
+    keyboardAvoidingView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        justifyContent: 'flex-end',
+        justifyContent: 'center',
         alignItems: 'center',
-        width:"100%",
+        width: '100%',
+        paddingHorizontal: 20,
     },
     modalContainer: {
         backgroundColor: '#fff',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
+        borderRadius: 20,
         width: '100%',
-        maxHeight: '95%',
+        maxWidth: 500,
+        maxHeight: '90%',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
         shadowRadius: 12,
         elevation: 10,
         overflow: 'hidden',
