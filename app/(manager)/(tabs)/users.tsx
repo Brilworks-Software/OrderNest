@@ -4,9 +4,9 @@ import { useAuth } from '@/firebase/hooks/useAuth'
 import { useUser, useUsersByRestaurant } from '@/firebase/hooks/useUsers'
 import { useCreateInviteUser } from '@/firebase/hooks/useInviteUsers'
 import type { InviteUser } from '@/firebase/types'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import InviteUserModal from '@/components/InviteUserModal'
 import { MaterialIcons } from '@expo/vector-icons'
+import { Container } from '@/components/Container'
 
 export default function Users() {
   const { currentUser, isLoadingUser } = useAuth()
@@ -140,7 +140,7 @@ export default function Users() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Staff Members</Text>
@@ -226,15 +226,11 @@ export default function Users() {
         error={error}
         submitting={submitting}
       />
-    </SafeAreaView>
+    </Container>
   )
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
   container: {
     flex: 1,
   },
@@ -247,7 +243,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#1d304b',
     marginBottom: 4,
@@ -295,7 +291,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   avatarStaff: {
-    backgroundColor: '#104A9c',
+    backgroundColor: '#10b981',
+    borderRadius: "50%"
   },
   avatarChef: {
     backgroundColor: '#ff6b35',
@@ -325,7 +322,7 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   typeTextStaff: {
-    color: '#104A9c',
+    color: '#10b981',
   },
   typeTextChef: {
     color: '#ff6b35',

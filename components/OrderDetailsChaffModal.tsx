@@ -27,7 +27,7 @@ interface OrderItemWithDetails extends OrderItem {
   menuItem?: MenuItem;
 }
 
-export default function OrderDetailsModal({
+export default function OrderDetailsChaffModal({
   visible,
   onClose,
   order,
@@ -136,8 +136,8 @@ export default function OrderDetailsModal({
           <View style={styles.orderInfoSection}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Status:</Text>
-              <View style={[styles.statusBadge, { backgroundColor: currentOrder.status === 'pending' ? '#ff9f0a20' : '#34c75920' }]}>
-                <Text style={[styles.statusText, { color: currentOrder.status === 'pending' ? '#ff9f0a' : '#34c759' }]}>
+              <View style={[styles.statusBadge, { backgroundColor: "#ff6b3520" }]}>
+                <Text style={[styles.statusText, { color: '#ff6b35' }]}>
                   {currentOrder.status}
                 </Text>
               </View>
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 20
   },
   statusText: {
     fontSize: 12,
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   deliveredBadge: {
-    backgroundColor: '#34c759',
+    backgroundColor: '#ff6b35',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   deliveredButton: {
-    backgroundColor: '#34c759',
+    backgroundColor: '#ff6b35',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,

@@ -1,11 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, TouchableOpacity, Platform } from 'react-native';
 import { useTables, useUpdateTableStatus } from '@/firebase/hooks/useTable';
 import type { Table } from '@/firebase/types';
 import { useAuth } from '@/firebase/hooks/useAuth';
 import { useUser } from '@/firebase/hooks/useUsers';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import StatusMenuModal from '@/components/StatusMenuModal';
+import { Container } from '@/components/Container';
 
 export default function home() {
   const { currentUser } = useAuth();
@@ -14,24 +14,32 @@ export default function home() {
 
   const { data: tables, isLoading, error } = useTables(restaurantId);
   const updateStatus = useUpdateTableStatus();
+  const [statusFilter, setStatusFilter] = useState<'all' | 'available' | 'occupied' | 'reserved'>('all');
+
+  // Filter tables based on selected status - must be called before any early returns
+  const filteredTables = useMemo(() => {
+    if (!tables) return [];
+    if (statusFilter === 'all') return tables;
+    return tables.filter(t => t.status === statusFilter);
+  }, [tables, statusFilter]);
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <Container>
         <View style={styles.center}>
           <ActivityIndicator size="large" />
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <Container>
         <View style={styles.center}>
           <Text style={styles.error}>Failed to load tables</Text>
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
@@ -103,7 +111,7 @@ export default function home() {
         </View>
 
         <View style={styles.info}>
-          <Text style={styles.title}>Table {item.table_number ?? item.id}</Text>
+          <Text style={styles.title}>{item.table_name ? item.table_name :`Table ${item.table_number ?? item.id}`}</Text>
           <View style={styles.metaRow}>
             <View style={[styles.statusPill, { backgroundColor: statusColor + '20' }]}>
               <Text style={[styles.statusIcon, { color: statusColor, marginRight: 6 }]}>{statusIcon}</Text>
@@ -147,56 +155,153 @@ export default function home() {
   const statusCounts = getStatusCounts();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container>
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Text style={styles.header}>Tables</Text>
-          <Text style={styles.subHeader}>{statusCounts.total} total</Text>
+          <Text style={styles.subHeader}>
+            {statusFilter === 'all' 
+              ? `${statusCounts.total} total` 
+              : `${filteredTables.length} ${statusFilter}`}
+          </Text>
         </View>
 
         {/* Status Summary Cards */}
         <View style={styles.summaryContainer}>
-          <View style={[styles.summaryCard, styles.summaryCardAvailable]}>
+          <TouchableOpacity
+            style={[
+              styles.summaryCard,
+              styles.summaryCardAvailable,
+              statusFilter === 'available' && styles.summaryCardActive
+            ]}
+            onPress={() => setStatusFilter(statusFilter === 'available' ? 'all' : 'available')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.summaryNumber}>{statusCounts.available}</Text>
             <Text style={styles.summaryLabel}>Available</Text>
-          </View>
-          <View style={[styles.summaryCard, styles.summaryCardOccupied]}>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.summaryCard,
+              styles.summaryCardOccupied,
+              statusFilter === 'occupied' && styles.summaryCardActive
+            ]}
+            onPress={() => setStatusFilter(statusFilter === 'occupied' ? 'all' : 'occupied')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.summaryNumber}>{statusCounts.occupied}</Text>
             <Text style={styles.summaryLabel}>Occupied</Text>
-          </View>
-          <View style={[styles.summaryCard, styles.summaryCardReserved]}>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.summaryCard,
+              styles.summaryCardReserved,
+              statusFilter === 'reserved' && styles.summaryCardActive
+            ]}
+            onPress={() => setStatusFilter(statusFilter === 'reserved' ? 'all' : 'reserved')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.summaryNumber}>{statusCounts.reserved}</Text>
             <Text style={styles.summaryLabel}>Reserved</Text>
-          </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Filter Tabs */}
+        <View style={styles.filterContainer}>
+          <TouchableOpacity
+            style={[
+              styles.filterTab,
+              statusFilter === 'all' && styles.filterTabActive
+            ]}
+            onPress={() => setStatusFilter('all')}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterTabText,
+              statusFilter === 'all' && styles.filterTabTextActive
+            ]}>
+              All
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.filterTab,
+              statusFilter === 'available' && styles.filterTabActive
+            ]}
+            onPress={() => setStatusFilter('available')}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterTabText,
+              statusFilter === 'available' && styles.filterTabTextActive
+            ]}>
+              Available
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.filterTab,
+              statusFilter === 'occupied' && styles.filterTabActive
+            ]}
+            onPress={() => setStatusFilter('occupied')}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterTabText,
+              statusFilter === 'occupied' && styles.filterTabTextActive
+            ]}>
+              Occupied
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.filterTab,
+              statusFilter === 'reserved' && styles.filterTabActive
+            ]}
+            onPress={() => setStatusFilter('reserved')}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterTabText,
+              statusFilter === 'reserved' && styles.filterTabTextActive
+            ]}>
+              Reserved
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <FlatList
-          data={tables ?? []}
+          data={filteredTables}
           keyExtractor={(t) => t.id}
           renderItem={({ item }) => <TableRow item={item} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyIcon}>🍽️</Text>
-              <Text style={styles.emptyTitle}>No tables found</Text>
-              <Text style={styles.emptyMessage}>Tables will appear here once they are added</Text>
+              <Text style={styles.emptyTitle}>
+                {statusFilter === 'all' 
+                  ? 'No tables found' 
+                  : `No ${statusFilter} tables`}
+              </Text>
+              <Text style={styles.emptyMessage}>
+                {statusFilter === 'all' 
+                  ? 'Tables will appear here once they are added' 
+                  : `There are no ${statusFilter} tables at the moment`}
+              </Text>
             </View>
           }
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
       </View>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
   container: {
     flex: 1,
-    padding: 16,
+    // padding: 16,
+    paddingHorizontal: 16
   },
   center: {
     flex: 1,
@@ -209,12 +314,12 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: '#333',
     letterSpacing: -0.5,
   },
   subHeader: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     marginTop: 4,
     fontWeight: '500',
   },
@@ -225,36 +330,73 @@ const styles = StyleSheet.create({
   summaryCard: {
     flex: 1,
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 12,
     alignItems: 'center',
     marginHorizontal: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
   },
+  summaryCardActive: {
+    borderWidth: 3,
+    borderColor: '#fff',
+    transform: [{ scale: 1.05 }],
+  },
   summaryCardAvailable: {
-    backgroundColor: '#e6f4ff',
+    backgroundColor: '#0a84ff',
   },
   summaryCardOccupied: {
-    backgroundColor: '#fff4e6',
+    backgroundColor: '#ff9f0a',
   },
   summaryCardReserved: {
-    backgroundColor: '#f3e8ff',
+    backgroundColor: '#af52de',
   },
   summaryNumber: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: '#fff',
     marginBottom: 4,
   },
   summaryLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#fff',
     fontWeight: '600',
-    textTransform: 'uppercase',
+    // textTransform: 'uppercase',
     letterSpacing: 0.5,
+    textAlign: "center",
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  filterTab: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterTabActive: {
+    backgroundColor: '#10b981',
+  },
+  filterTabText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
+  },
+  filterTabTextActive: {
+    color: '#fff',
   },
   listContent: {
     paddingBottom: 16,
@@ -264,14 +406,14 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 12,
     marginBottom: 12,
     borderLeftWidth: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   left: {
     marginRight: 16,
@@ -295,7 +437,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     marginBottom: 6,
   },
   metaRow: {
@@ -324,7 +466,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
@@ -347,17 +489,17 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     marginBottom: 8,
   },
   emptyMessage: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     textAlign: 'center',
     lineHeight: 20,
   },
   error: {
-    color: '#ff3b30',
+    color: '#ff4444',
     fontSize: 16,
     fontWeight: '600',
   },

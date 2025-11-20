@@ -10,12 +10,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 export type Table = {
   id: string;
   restaurant_id: string;
   table_number: number;
+  table_name: string;
   status: string;
 };
 
@@ -35,21 +37,24 @@ const TableModal: React.FC<TableModalProps> = ({
   onSubmit,
 }) => {
   const [tableNumber, setTableNumber] = useState('');
+  const [tableName, setTableName] = useState('');
   const [status, setStatus] = useState<'available' | 'occupied' | 'reserved'>(
     'available'
   );
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const [focusedInput, setFocusedInput] = useState<boolean>(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const isEditMode = !!table;
 
   useEffect(() => {
     if (isEditMode && table) {
       setTableNumber(String(table.table_number));
+      setTableName(table.table_name || '');
       setStatus(table.status as any);
     } else {
       setTableNumber('');
+      setTableName('');
       setStatus('available');
     }
     setErrorMessage('');
@@ -74,6 +79,7 @@ const TableModal: React.FC<TableModalProps> = ({
       id: isEditMode ? table!.id : `${restaurantId}-${Math.random().toString(36).slice(2, 20)}`,
       restaurant_id: restaurantId,
       table_number: parsed,
+      table_name: tableName.trim() || `Table ${parsed}`,
       status,
     };
 
@@ -105,14 +111,14 @@ const TableModal: React.FC<TableModalProps> = ({
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
+          <SafeAreaView style={styles.modalContainer} edges={['top', 'bottom']}>
             {/* Header */}
             <View style={styles.modalHeader}>
               <View style={styles.headerContent}>
                 <Ionicons 
                   name="grid-outline" 
                   size={24} 
-                  color="#007AFF" 
+                  color="#104A9c" 
                   style={styles.headerIcon} 
                 />
                 <Text style={styles.modalTitle}>
@@ -134,13 +140,13 @@ const TableModal: React.FC<TableModalProps> = ({
                 <Text style={styles.label}>Table Number</Text>
                 <View style={[
                   styles.inputContainer,
-                  focusedInput && styles.inputContainerFocused,
+                  focusedInput === 'tableNumber' && styles.inputContainerFocused,
                   errorMessage && styles.inputContainerError
                 ]}>
                   <Ionicons 
                     name="grid-outline" 
                     size={20} 
-                    color={focusedInput ? '#007AFF' : '#999'} 
+                    color={focusedInput === 'tableNumber' ? '#007AFF' : '#104A9c'} 
                     style={styles.inputIcon}
                   />
                   <TextInput
@@ -152,6 +158,32 @@ const TableModal: React.FC<TableModalProps> = ({
                     }}
                     keyboardType="number-pad"
                     placeholder="Enter table number"
+                    placeholderTextColor="#999"
+                    editable={!loading}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Table Name</Text>
+                <View style={[
+                  styles.inputContainer,
+                  focusedInput === 'tableName' && styles.inputContainerFocused
+                ]}>
+                  <Ionicons 
+                    name="text-outline" 
+                    size={20} 
+                    color={focusedInput === 'tableName' ? '#007AFF' : '#104A9c'} 
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    value={tableName}
+                    onChangeText={(t) => {
+                      setTableName(t);
+                      if (errorMessage) setErrorMessage('');
+                    }}
+                    placeholder="Enter table name (optional)"
                     placeholderTextColor="#999"
                     editable={!loading}
                   />
@@ -183,7 +215,8 @@ const TableModal: React.FC<TableModalProps> = ({
                 style={[
                   styles.modalButton,
                   styles.saveButton,
-                  loading && styles.buttonDisabled
+                  loading && styles.buttonDisabled,
+                  {backgroundColor: "#104A9c"}
                 ]}
                 onPress={handleSave}
                 disabled={loading}
@@ -205,7 +238,7 @@ const TableModal: React.FC<TableModalProps> = ({
                 )}
               </TouchableOpacity>
             </View>
-          </View>
+          </SafeAreaView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -296,6 +329,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fafafa',
     paddingHorizontal: 4,
     minHeight: 52,
+    maxHeight: 90,
   },
   inputContainerFocused: {
     borderColor: '#007AFF',
@@ -357,6 +391,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     minHeight: 52,
+    maxHeight: 90,
   },
   buttonDisabled: {
     opacity: 0.6,

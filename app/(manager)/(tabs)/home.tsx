@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Container } from '@/components/Container';
 import { useAuth } from '@/firebase/hooks/useAuth';
 import { useUser } from '@/firebase/hooks/useUsers';
 import { useRestaurant } from '@/firebase/hooks/useRestaurant';
@@ -10,6 +10,7 @@ import { useTables } from '@/firebase/hooks/useTable';
 import { useUsersByRestaurant } from '@/firebase/hooks/useUsers';
 import { MaterialIcons } from '@expo/vector-icons';
 import type { Order } from '@/firebase/types';
+import { theme, addOpacitySuffix } from '@/theme';
 
 export default function home() {
   const router = useRouter();
@@ -125,11 +126,11 @@ export default function home() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <Container>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#104A9c" />
+          <ActivityIndicator size="large" color={theme.colors.primary.manager} />
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
@@ -141,7 +142,7 @@ export default function home() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container>
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -149,19 +150,24 @@ export default function home() {
       >
         {/* Header */}
         <View style={styles.headerContainer}>
-          <View>
-            <Text style={styles.greeting}>{greeting()}</Text>
-            <Text style={styles.restaurantName}>
-              {restaurant?.name || 'Restaurant'}
-            </Text>
+          <View style={styles.headerContent}>
+            <View>
+              <Text style={styles.greeting}>{greeting()}</Text>
+              <Text style={styles.restaurantName}>
+                {restaurant?.name || 'Restaurant'}
+              </Text>
+            </View>
+            <View style={styles.headerBadge}>
+              <MaterialIcons name="restaurant" size={20} color={theme.colors.primary.manager} />
+            </View>
           </View>
         </View>
 
         {/* Statistics Cards */}
         <View style={styles.statsContainer}>
           <View style={[styles.statCard, styles.statCardPrimary]}>
-            <View style={styles.statIconContainer}>
-              <MaterialIcons name="receipt-long" size={24} color="#104A9c" />
+            <View style={[styles.statIconContainer, { backgroundColor: addOpacitySuffix(theme.colors.primary.manager, 0.1) }]}>
+              <MaterialIcons name="receipt-long" size={26} color={theme.colors.primary.manager} />
             </View>
             <Text style={styles.statValue}>{stats.activeOrders}</Text>
             <Text style={styles.statLabel}>Active Orders</Text>
@@ -169,8 +175,8 @@ export default function home() {
           </View>
 
           <View style={[styles.statCard, styles.statCardSuccess]}>
-            <View style={styles.statIconContainer}>
-              <MaterialIcons name="table-restaurant" size={24} color="#34c759" />
+            <View style={[styles.statIconContainer, { backgroundColor: addOpacitySuffix(theme.colors.status.success, 0.1) }]}>
+              <MaterialIcons name="table-restaurant" size={26} color={theme.colors.status.success} />
             </View>
             <Text style={styles.statValue}>{stats.totalTables}</Text>
             <Text style={styles.statLabel}>Total Tables</Text>
@@ -182,8 +188,8 @@ export default function home() {
 
         <View style={styles.statsContainer}>
           <View style={[styles.statCard, styles.statCardWarning]}>
-            <View style={styles.statIconContainer}>
-              <MaterialIcons name="currency-rupee" size={24} color="#ff9f0a" />
+            <View style={[styles.statIconContainer, { backgroundColor: addOpacitySuffix(theme.colors.status.warning, 0.1) }]}>
+              <MaterialIcons name="currency-rupee" size={26} color={theme.colors.status.warning} />
             </View>
             <Text style={styles.statValue}>₹{stats.todayRevenue.toFixed(0)}</Text>
             <Text style={styles.statLabel}>Today's Revenue</Text>
@@ -193,8 +199,8 @@ export default function home() {
           </View>
 
           <View style={[styles.statCard, styles.statCardInfo]}>
-            <View style={styles.statIconContainer}>
-              <MaterialIcons name="people" size={24} color="#0a84ff" />
+            <View style={[styles.statIconContainer, { backgroundColor: addOpacitySuffix(theme.colors.status.info, 0.1) }]}>
+              <MaterialIcons name="people" size={26} color={theme.colors.status.info} />
             </View>
             <Text style={styles.statValue}>{stats.totalStaff}</Text>
             <Text style={styles.statLabel}>Staff Members</Text>
@@ -209,10 +215,10 @@ export default function home() {
             <TouchableOpacity
               style={styles.quickAccessCard}
               onPress={() => router.push('/(manager)/orders')}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
-              <View style={[styles.quickAccessIcon, { backgroundColor: '#ff6b6b15' }]}>
-                <MaterialIcons name="receipt-long" size={28} color="#ff6b6b" />
+              <View style={[styles.quickAccessIcon, { backgroundColor: addOpacitySuffix(theme.colors.quickAccess.orders, 0.12) }]}>
+                <MaterialIcons name="receipt-long" size={30} color={theme.colors.quickAccess.orders} />
               </View>
               <Text style={styles.quickAccessLabel}>Orders</Text>
             </TouchableOpacity>
@@ -220,10 +226,10 @@ export default function home() {
             <TouchableOpacity
               style={styles.quickAccessCard}
               onPress={() => router.push('/(manager)/menuItem')}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
-              <View style={[styles.quickAccessIcon, { backgroundColor: '#104A9c15' }]}>
-                <MaterialIcons name="restaurant-menu" size={28} color="#104A9c" />
+              <View style={[styles.quickAccessIcon, { backgroundColor: addOpacitySuffix(theme.colors.quickAccess.menu, 0.12) }]}>
+                <MaterialIcons name="restaurant-menu" size={30} color={theme.colors.quickAccess.menu} />
               </View>
               <Text style={styles.quickAccessLabel}>Menu Items</Text>
             </TouchableOpacity>
@@ -231,10 +237,10 @@ export default function home() {
             <TouchableOpacity
               style={styles.quickAccessCard}
               onPress={() => router.push('/(manager)/tables')}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
-              <View style={[styles.quickAccessIcon, { backgroundColor: '#34c75915' }]}>
-                <MaterialIcons name="table-restaurant" size={28} color="#34c759" />
+              <View style={[styles.quickAccessIcon, { backgroundColor: addOpacitySuffix(theme.colors.quickAccess.tables, 0.12) }]}>
+                <MaterialIcons name="table-restaurant" size={30} color={theme.colors.quickAccess.tables} />
               </View>
               <Text style={styles.quickAccessLabel}>Tables</Text>
             </TouchableOpacity>
@@ -242,10 +248,10 @@ export default function home() {
             <TouchableOpacity
               style={styles.quickAccessCard}
               onPress={() => router.push('/(manager)/(tabs)/users')}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
-              <View style={[styles.quickAccessIcon, { backgroundColor: '#0a84ff15' }]}>
-                <MaterialIcons name="people" size={28} color="#0a84ff" />
+              <View style={[styles.quickAccessIcon, { backgroundColor: addOpacitySuffix(theme.colors.quickAccess.staff, 0.12) }]}>
+                <MaterialIcons name="people" size={30} color={theme.colors.quickAccess.staff} />
               </View>
               <Text style={styles.quickAccessLabel}>Staff</Text>
             </TouchableOpacity>
@@ -253,10 +259,10 @@ export default function home() {
             <TouchableOpacity
               style={styles.quickAccessCard}
               onPress={() => router.push('/(manager)/(tabs)/settings')}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
-              <View style={[styles.quickAccessIcon, { backgroundColor: '#ff9f0a15' }]}>
-                <MaterialIcons name="settings" size={28} color="#ff9f0a" />
+              <View style={[styles.quickAccessIcon, { backgroundColor: addOpacitySuffix(theme.colors.quickAccess.settings, 0.12) }]}>
+                <MaterialIcons name="settings" size={30} color={theme.colors.quickAccess.settings} />
               </View>
               <Text style={styles.quickAccessLabel}>Settings</Text>
             </TouchableOpacity>
@@ -269,13 +275,13 @@ export default function home() {
           <View style={styles.tableStatusContainer}>
             <View style={styles.tableStatusRow}>
               <View style={styles.tableStatusItem}>
-                <View style={[styles.tableStatusDot, { backgroundColor: '#34c759' }]} />
+                <View style={[styles.tableStatusDot, { backgroundColor: theme.colors.status.available }]} />
                 <Text style={styles.tableStatusText}>
                   {stats.availableTables} Available
                 </Text>
               </View>
               <View style={styles.tableStatusItem}>
-                <View style={[styles.tableStatusDot, { backgroundColor: '#0a84ff' }]} />
+                <View style={[styles.tableStatusDot, { backgroundColor: theme.colors.status.occupied }]} />
                 <Text style={styles.tableStatusText}>
                   {stats.occupiedTables} Occupied
                 </Text>
@@ -284,7 +290,7 @@ export default function home() {
             {stats.reservedTables > 0 && (
               <View style={styles.tableStatusRow}>
                 <View style={styles.tableStatusItem}>
-                  <View style={[styles.tableStatusDot, { backgroundColor: '#ff9f0a' }]} />
+                  <View style={[styles.tableStatusDot, { backgroundColor: theme.colors.status.reserved }]} />
                   <Text style={styles.tableStatusText}>
                     {stats.reservedTables} Reserved
                   </Text>
@@ -311,13 +317,14 @@ export default function home() {
               return (
                 <TouchableOpacity
                   key={order.id}
-                  style={[styles.orderCard, { borderLeftColor: statusColor }]}
-                  activeOpacity={0.7}
+                  style={[styles.orderCard, { borderLeftColor: "#104A9c" }]}
+                  activeOpacity={0.8}
+                  onPress={() => router.push(`/(manager)/orders`)}
                 >
                   <View style={styles.orderCardContent}>
                     <View style={styles.orderCardLeft}>
-                      <View style={[styles.orderTableBadge, { backgroundColor: statusColor + '15' }]}>
-                        <Text style={[styles.orderTableText, { color: statusColor }]}>
+                      <View style={[styles.orderTableBadge, { backgroundColor: addOpacitySuffix("#104A9c", 0.15) }]}>
+                        <Text style={[styles.orderTableText, { color: "#104A9c" }]}>
                           {tableNumber}
                         </Text>
                       </View>
@@ -327,8 +334,8 @@ export default function home() {
                       </View>
                     </View>
                     <View style={styles.orderCardRight}>
-                      <View style={[styles.orderStatusBadge, { backgroundColor: statusColor + '20' }]}>
-                        <Text style={[styles.orderStatusText, { color: statusColor }]}>
+                      <View style={[styles.orderStatusBadge, { backgroundColor: addOpacitySuffix("#104A9c", 0.2) }]}>
+                        <Text style={[styles.orderStatusText, { color: "#104A9c" }]}>
                           {order.status}
                         </Text>
                       </View>
@@ -343,20 +350,16 @@ export default function home() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 24,
+    paddingBottom: theme.spacing['2xl'],
   },
   center: {
     flex: 1,
@@ -364,151 +367,164 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 24,
-    backgroundColor: '#fff',
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.lg,
+    paddingBottom: theme.spacing.xl,
+    backgroundColor: theme.colors.semantic.background.secondary,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: theme.colors.semantic.border.secondary,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: addOpacitySuffix(theme.colors.primary.manager, 0.1),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   greeting: {
-    fontSize: 16,
-    color: '#6b7280',
-    fontWeight: '500',
-    marginBottom: 4,
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.semantic.text.quaternary,
+    fontWeight: theme.typography.fontWeight.medium as any,
+    marginBottom: theme.spacing.xs,
   },
   restaurantName: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1a1a1a',
-    letterSpacing: -0.5,
+    fontSize: theme.typography.fontSize['3xl'],
+    fontWeight: theme.typography.fontWeight.extrabold as any,
+    color: theme.colors.semantic.text.primary,
+    letterSpacing: theme.typography.letterSpacing.tight,
   },
   statsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginTop: 20,
-    gap: 12,
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+    gap: theme.spacing.md,
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: theme.colors.semantic.background.secondary,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.base,
+    shadowColor: theme.shadows.md.shadowColor,
+    shadowOffset: theme.shadows.md.shadowOffset,
+    shadowOpacity: theme.shadows.md.shadowOpacity,
+    shadowRadius: theme.shadows.md.shadowRadius,
+    elevation: theme.shadows.md.elevation,
   },
   statCardPrimary: {
     borderLeftWidth: 4,
-    borderLeftColor: '#104A9c',
+    borderLeftColor: theme.colors.primary.manager,
   },
   statCardSuccess: {
     borderLeftWidth: 4,
-    borderLeftColor: '#34c759',
+    borderLeftColor: theme.colors.status.success,
   },
   statCardWarning: {
     borderLeftWidth: 4,
-    borderLeftColor: '#ff9f0a',
+    borderLeftColor: theme.colors.status.warning,
   },
   statCardInfo: {
     borderLeftWidth: 4,
-    borderLeftColor: '#0a84ff',
+    borderLeftColor: theme.colors.status.info,
   },
   statIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: '#f8f9fa',
+    width: 52,
+    height: 52,
+    borderRadius: theme.borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: theme.spacing.md,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#1a1a1a',
-    marginBottom: 4,
+    fontSize: theme.typography.fontSize['2xl'],
+    fontWeight: theme.typography.fontWeight.extrabold as any,
+    color: theme.colors.semantic.text.primary,
+    marginBottom: theme.spacing.xs,
   },
   statLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1a1a1a',
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold as any,
+    color: theme.colors.semantic.text.primary,
     marginBottom: 2,
   },
   statSubLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-    fontWeight: '500',
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.semantic.text.quaternary,
+    fontWeight: theme.typography.fontWeight.medium as any,
   },
   sectionContainer: {
-    paddingHorizontal: 20,
-    marginTop: 24,
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.xl,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: theme.spacing.base,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#1a1a1a',
-    marginBottom: 16,
-    letterSpacing: -0.5,
+    fontSize: theme.typography.fontSize.xl,
+    fontWeight: theme.typography.fontWeight.extrabold as any,
+    color: theme.colors.semantic.text.primary,
+    marginBottom: theme.spacing.base,
+    letterSpacing: theme.typography.letterSpacing.tight,
   },
   seeAllText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#104A9c',
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold as any,
+    color: theme.colors.primary.manager,
   },
   quickAccessGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: theme.spacing.md,
   },
   quickAccessCard: {
-    width: '47%',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
+    flex: 1,
+    minWidth: 150,
+    backgroundColor: theme.colors.semantic.background.secondary,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowColor: theme.shadows.md.shadowColor,
+    shadowOffset: theme.shadows.md.shadowOffset,
+    shadowOpacity: theme.shadows.md.shadowOpacity,
+    shadowRadius: theme.shadows.md.shadowRadius,
+    elevation: theme.shadows.md.elevation,
   },
   quickAccessIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
+    width: 68,
+    height: 68,
+    borderRadius: theme.borderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: theme.spacing.md,
   },
   quickAccessLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1a1a1a',
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold as any,
+    color: theme.colors.semantic.text.primary,
     textAlign: 'center',
   },
   tableStatusContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: theme.colors.semantic.background.secondary,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.base,
+    shadowColor: theme.shadows.md.shadowColor,
+    shadowOffset: theme.shadows.md.shadowOffset,
+    shadowOpacity: theme.shadows.md.shadowOpacity,
+    shadowRadius: theme.shadows.md.shadowRadius,
+    elevation: theme.shadows.md.elevation,
   },
   tableStatusRow: {
     flexDirection: 'row',
-    gap: 24,
-    marginBottom: 12,
+    gap: theme.spacing.xl,
+    marginBottom: theme.spacing.md,
   },
   tableStatusItem: {
     flexDirection: 'row',
@@ -519,29 +535,29 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginRight: 8,
+    marginRight: theme.spacing.sm,
   },
   tableStatusText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1a1a1a',
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold as any,
+    color: theme.colors.semantic.text.primary,
   },
   orderCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 12,
+    backgroundColor: theme.colors.semantic.background.secondary,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.md,
     borderLeftWidth: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowColor: theme.shadows.sm.shadowColor,
+    shadowOffset: theme.shadows.sm.shadowOffset,
+    shadowOpacity: theme.shadows.sm.shadowOpacity,
+    shadowRadius: theme.shadows.sm.shadowRadius,
+    elevation: theme.shadows.sm.elevation,
   },
   orderCardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: theme.spacing.base,
   },
   orderCardLeft: {
     flexDirection: 'row',
@@ -552,45 +568,45 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   orderTableBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: theme.borderRadius.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: theme.spacing.md,
   },
   orderTableText: {
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.extrabold as any,
   },
   orderInfo: {
     flex: 1,
   },
   orderTableLabel: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 4,
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.bold as any,
+    color: theme.colors.semantic.text.primary,
+    marginBottom: theme.spacing.xs,
   },
   orderTime: {
-    fontSize: 12,
-    color: '#6b7280',
-    fontWeight: '500',
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.semantic.text.quaternary,
+    fontWeight: theme.typography.fontWeight.medium as any,
   },
   orderStatusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 6,
+    paddingHorizontal: theme.spacing.base,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.xs,
   },
   orderStatusText: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.semibold as any,
     textTransform: 'capitalize',
   },
   orderAmount: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1a1a1a',
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.bold as any,
+    color: theme.colors.semantic.text.primary,
   },
 });

@@ -5,8 +5,8 @@ import { useTables } from '@/firebase/hooks/useTable';
 import type { Order } from '@/firebase/types';
 import { useAuth } from '@/firebase/hooks/useAuth';
 import { useUser } from '@/firebase/hooks/useUsers';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import CreateOrderModal from '@/components/CreateOrderModal';
+import { Container } from '@/components/Container';
 import BillModal from '@/components/BillModal';
 import { useBillsByOrder } from '@/firebase/hooks/useBill';
 
@@ -65,6 +65,11 @@ export default function order() {
     return table?.table_number ?? tableId;
   };
 
+  const getTableName = (tableId: string) => {
+    const table = tables?.find(t => t.id === tableId);
+    return table?.table_name ?? `Table ${table?.table_number}`;
+  };
+
   // Format time
   const formatTime = (timestamp: any) => {
     if (!timestamp) return 'Just now';
@@ -103,6 +108,7 @@ export default function order() {
   const OrderCard = ({ item }: { item: Order }) => {
     const statusColor = getStatusColor(item.status);
     const tableNumber = getTableNumber(item.table_id);
+    const tableName = getTableName(item.table_id);
     const timeAgo = formatTime((item as any).createdAt);
     const itemCount = item.order_items?.reduce((sum, item) => sum + item.qty, 0) || 0;
     
@@ -134,24 +140,24 @@ export default function order() {
 
     return (
       <TouchableOpacity 
-        style={[styles.orderCard, { borderLeftColor: statusColor }]}
+        style={[styles.orderCard, { borderLeftColor: "#10b981" }]}
         activeOpacity={0.7}
         onPress={handleOrderPress}
       >
         <View style={styles.orderHeader}>
           <View style={styles.orderHeaderLeft}>
-            <View style={[styles.tableBadge, { backgroundColor: statusColor + '15' }]}>
-              <Text style={[styles.tableBadgeText, { color: statusColor }]}>
+            <View style={[styles.tableBadge, { backgroundColor: "#10b981" + '15' }]}>
+              <Text style={[styles.tableBadgeText, { color: "#10b981" }]}>
                 {tableNumber}
               </Text>
             </View>
             <View style={styles.orderInfo}>
-              <Text style={styles.orderTitle}>Table {tableNumber}</Text>
+              <Text style={styles.orderTitle}>{tableName}</Text>
               <Text style={styles.orderTime}>{timeAgo}</Text>
             </View>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
-            <Text style={[styles.statusText, { color: statusColor }]}>
+          <View style={[styles.statusBadge, { backgroundColor: "#10b981" + '20' }]}>
+            <Text style={[styles.statusText, { color: "#10b981" }]}>
               {item.status}
             </Text>
           </View>
@@ -200,16 +206,16 @@ export default function order() {
 
   if (isLoadingOrders) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <Container>
         <View style={styles.center}>
           <ActivityIndicator size="large" />
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container>
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Text style={styles.header}>Orders</Text>
@@ -303,17 +309,14 @@ export default function order() {
           }}
           order={selectedOrderForBill}
           restaurantId={restaurantId}
+          theme='#10b981'
         />
       </View>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
   container: {
     flex: 1,
     padding: 16,
@@ -329,12 +332,12 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: '#333',
     letterSpacing: -0.5,
   },
   subHeader: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     marginTop: 4,
     fontWeight: '500',
   },
@@ -345,10 +348,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 1,
+    elevation: 3,
   },
   filterTab: {
     flex: 1,
@@ -359,12 +362,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   filterTabActive: {
-    backgroundColor: '#0a84ff',
+    backgroundColor: '#10b981',
   },
   filterTabText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    color: '#666',
   },
   filterTabTextActive: {
     color: '#fff',
@@ -374,15 +377,15 @@ const styles = StyleSheet.create({
   },
   orderCard: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderLeftWidth: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   orderHeader: {
     flexDirection: 'row',
@@ -415,12 +418,12 @@ const styles = StyleSheet.create({
   orderTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     marginBottom: 4,
   },
   orderTime: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#666',
     fontWeight: '500',
   },
   statusBadge: {
@@ -446,12 +449,12 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     fontWeight: '500',
   },
   detailValue: {
     fontSize: 16,
-    color: '#1a1a1a',
+    color: '#333',
     fontWeight: '700',
   },
   emptyContainer: {
@@ -467,12 +470,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     marginBottom: 8,
   },
   emptyMessage: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -483,7 +486,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#0a84ff',
+    backgroundColor: '#10b981',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 6,
@@ -503,7 +506,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,
-    backgroundColor: '#34c759',
+    backgroundColor: '#10b981',
     alignItems: 'center',
     justifyContent: 'center',
   },

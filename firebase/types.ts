@@ -38,6 +38,7 @@ export type Table = {
   id: string;
   restaurant_id: string;
   table_number: number;
+  table_name: string;
   status: string;
 };
 

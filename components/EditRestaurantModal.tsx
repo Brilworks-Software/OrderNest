@@ -12,6 +12,7 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { Restaurant } from '@/firebase/types';
 import { UseMutationResult } from '@tanstack/react-query';
@@ -113,11 +114,11 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
+                    <SafeAreaView style={styles.modalContainer} edges={['top', 'bottom']}>
                     {/* Header */}
                     <View style={styles.modalHeader}>
                         <View style={styles.headerContent}>
-                            <Ionicons name="restaurant" size={24} color="#007AFF" style={styles.headerIcon} />
+                            <Ionicons name="restaurant" size={24} color="#104A9c" style={styles.headerIcon} />
                             <Text style={styles.modalTitle}>Edit Restaurant</Text>
                         </View>
                         <TouchableOpacity
@@ -146,7 +147,7 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                     <Ionicons 
                                         name="restaurant-outline" 
                                         size={20} 
-                                        color={focusedInput === 'name' ? '#007AFF' : '#999'} 
+                                        color={focusedInput === 'name' ? '#007AFF' : '#104A9c'} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
@@ -173,7 +174,7 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                     <Ionicons 
                                         name="location-outline" 
                                         size={20} 
-                                        color={focusedInput === 'address' ? '#007AFF' : '#999'} 
+                                        color={focusedInput === 'address' ? '#007AFF' : '#104A9c'} 
                                         style={[styles.inputIcon, styles.textAreaIcon]}
                                     />
                                     <TextInput
@@ -201,7 +202,7 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                     <Ionicons 
                                         name="document-text-outline" 
                                         size={20} 
-                                        color={focusedInput === 'gstNumber' ? '#007AFF' : '#999'} 
+                                        color={focusedInput === 'gstNumber' ? '#007AFF' : '#104A9c'} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
@@ -227,7 +228,7 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                     <Ionicons 
                                         name="calculator-outline" 
                                         size={20} 
-                                        color={focusedInput === 'gstPercentage' ? '#007AFF' : '#999'} 
+                                        color={focusedInput === 'gstPercentage' ? '#007AFF' : '#104A9c'} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
@@ -254,7 +255,7 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                     <Ionicons 
                                         name="card-outline" 
                                         size={20} 
-                                        color={focusedInput === 'serviceCharge' ? '#007AFF' : '#999'} 
+                                        color={focusedInput === 'serviceCharge' ? '#007AFF' : '#104A9c'} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
@@ -296,7 +297,8 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                             style={[
                                 styles.modalButton, 
                                 styles.saveButton,
-                                updateRestaurantMutation.isPending && styles.buttonDisabled
+                                updateRestaurantMutation.isPending && styles.buttonDisabled,
+                                {backgroundColor: "#104A9c"}
                             ]}
                             onPress={handleUpdateRestaurant}
                             disabled={updateRestaurantMutation.isPending}
@@ -311,7 +313,7 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                             )}
                         </TouchableOpacity>
                     </View>
-                    </View>
+                </SafeAreaView>
                 </View>
             </KeyboardAvoidingView>
         </Modal>
@@ -411,6 +413,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fafafa',
         paddingHorizontal: 4,
         minHeight: 48,
+        maxHeight: "90%"
     },
     inputContainerFocused: {
         borderColor: '#007AFF',
@@ -427,6 +430,8 @@ const styles = StyleSheet.create({
     textAreaContainer: {
         alignItems: 'flex-start',
         minHeight: 90,
+        maxHeight: "97%",
+
     },
     inputIcon: {
         marginLeft: 10,
@@ -484,6 +489,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 6,
         minHeight: 48,
+        maxHeight: 90,
     },
     buttonDisabled: {
         opacity: 0.6,

@@ -10,7 +10,6 @@ export default function TabLayout() {
         headerStyle: { backgroundColor: '#FFFFFF' },
         headerTintColor: '#1d304b',
         headerTitleStyle: { fontWeight: 'bold' },
-        tabBarStyle: { backgroundColor: '#FFFFFF', borderTopColor: '#DFE0ED' },
         tabBarInactiveTintColor: '#abb5c3',
         tabBarActiveTintColor: '#104A9c',
         
@@ -36,6 +35,7 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarIcon: ({ color }) => <MaterialIcons name="settings" size={24} color={color}/>,
+          headerShown:false,
         }}
       />
       {/* <Tabs.Screen

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, Switch, Image, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMenuItems, useUpdateMenuItem } from '@/firebase/hooks/useMenuItem';
+import { Container } from '@/components/Container';
 import { useAuth } from '@/firebase/hooks/useAuth';
 import { useUser } from '@/firebase/hooks/useUsers';
 import type { MenuItem } from '@/firebase/types';
@@ -52,7 +52,7 @@ export default function MenuItems() {
             />
           ) : (
             <View style={[styles.imagePlaceholder, isUnavailable && styles.unavailableImage]}>
-              <MaterialIcons name="restaurant-menu" size={32} color="#abb5c3" />
+              <MaterialIcons name="restaurant-menu" size={32} color="#999" />
             </View>
           )}
           {item.category && (
@@ -80,13 +80,13 @@ export default function MenuItems() {
               activeOpacity={0.7}
             >
               {isToggling ? (
-                <ActivityIndicator size="small" color="#104A9c" />
+                <ActivityIndicator size="small" color="#ff6b35" />
               ) : (
                 <Switch
                   value={item.available}
                   onValueChange={() => toggleAvailability(item.id)}
-                  trackColor={{ false: '#fee2e2', true: '#dbeafe' }}
-                  thumbColor={item.available ? '#104A9c' : '#ef4444'}
+                  trackColor={{ false: '#ccc', true: '#ff6b35aa' }}
+                  thumbColor={item.available ? '#ff6b35' : '#999'}
                   ios_backgroundColor="#fee2e2"
                   disabled={isToggling}
                 />
@@ -118,16 +118,19 @@ export default function MenuItems() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <Container>
         <View style={styles.center}>
           <ActivityIndicator size="large" />
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container>
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>Menu Items</Text>
+      </View>
       <View style={styles.container}>
         {/* <View style={styles.headerContainer}>
           <Text style={styles.header}>Menu Items</Text>
@@ -145,7 +148,7 @@ export default function MenuItems() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <MaterialIcons name="restaurant-menu" size={64} color="#DFE0ED" />
+              <MaterialIcons name="restaurant-menu" size={64} color="#999" />
               <Text style={styles.emptyTitle}>No menu items</Text>
               <Text style={styles.emptyMessage}>
                 Menu items will appear here when they are added
@@ -154,18 +157,14 @@ export default function MenuItems() {
           }
         />
       </View>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
   container: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 12,
   },
   center: {
     flex: 1,
@@ -173,17 +172,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerContainer: {
-    marginBottom: 20,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
   },
   header: {
-    fontSize: 32,
+    fontSize: 22,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: '#333',
     letterSpacing: -0.5,
   },
   subHeader: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     marginTop: 4,
     fontWeight: '500',
   },
@@ -196,13 +196,14 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
+    marginHorizontal:2
   },
   unavailableCard: {
     backgroundColor: '#fafafa',
@@ -224,7 +225,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 12,
-    backgroundColor: '#f5f6fa',
+    backgroundColor: '#e0e0e0',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -232,7 +233,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     left: 8,
-    backgroundColor: 'rgba(16, 74, 156, 0.9)',
+    backgroundColor: 'rgba(255, 107, 53, 0.9)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -264,11 +265,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     flexShrink: 1,
   },
   unavailableName: {
-    color: '#6b7280',
+    color: '#666',
   },
   unavailableBadge: {
     backgroundColor: '#fee2e2',
@@ -294,12 +295,12 @@ const styles = StyleSheet.create({
   },
   desc: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#666',
     lineHeight: 18,
     marginBottom: 8,
   },
   unavailableDesc: {
-    color: '#9ca3af',
+    color: '#999',
   },
   footerRow: {
     flexDirection: 'row',
@@ -308,7 +309,7 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
   },
   priceContainer: {
-    backgroundColor: '#f5f6fa',
+    backgroundColor: '#fff3f0',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
@@ -316,10 +317,10 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#104A9c',
+    color: '#ff6b35',
   },
   unavailablePrice: {
-    color: '#9ca3af',
+    color: '#999',
   },
   availabilityContainer: {
     flexDirection: 'row',
@@ -332,14 +333,14 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   availableIndicator: {
-    backgroundColor: '#10b981',
+    backgroundColor: '#ff6b35',
   },
   unavailableIndicator: {
     backgroundColor: '#ef4444',
   },
   availText: {
     fontSize: 12,
-    color: '#10b981',
+    color: '#ff6b35',
     fontWeight: '600',
     marginRight: 4,
   },
@@ -355,13 +356,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     marginTop: 16,
     marginBottom: 8,
   },
   emptyMessage: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     textAlign: 'center',
     lineHeight: 20,
   },

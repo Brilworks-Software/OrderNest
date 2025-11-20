@@ -112,7 +112,8 @@ export default class TableService {
   ): Unsubscribe {
     const q = query(
       collection(db, this.COLLECTION_NAME),
-      where('restaurant_id', '==', restaurantId)
+      where('restaurant_id', '==', restaurantId),
+      orderBy('table_number', 'asc')
     );
 
     return onSnapshot(q, snapshot => {

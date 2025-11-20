@@ -12,6 +12,7 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 type ChangePasswordModalProps = {
@@ -20,6 +21,7 @@ type ChangePasswordModalProps = {
     isReauthenticating: boolean;
     onClose: () => void;
     onUpdatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+    theme: string;
 };
 
 const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
@@ -28,6 +30,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
     isReauthenticating,
     onClose,
     onUpdatePassword,
+    theme,
 }) => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -103,11 +106,11 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
+                    <SafeAreaView style={styles.modalContainer} edges={['top', 'bottom']}>
                     {/* Header */}
                     <View style={styles.modalHeader}>
                         <View style={styles.headerContent}>
-                            <Ionicons name="lock-closed" size={24} color="#007AFF" style={styles.headerIcon} />
+                            <Ionicons name="lock-closed" size={24} color={theme} style={styles.headerIcon} />
                             <Text style={styles.modalTitle}>Change Password</Text>
                         </View>
                         <TouchableOpacity
@@ -136,7 +139,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                     <Ionicons 
                                         name="lock-closed-outline" 
                                         size={20} 
-                                        color={focusedInput === 'current' ? '#007AFF' : '#999'} 
+                                        color={theme} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
@@ -158,7 +161,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         <Ionicons 
                                             name={showCurrentPassword ? 'eye' : 'eye-off'} 
                                             size={22} 
-                                            color={focusedInput === 'current' ? '#007AFF' : '#6b7280'} 
+                                            color={theme} 
                                         />
                                     </TouchableOpacity>
                                 </View>
@@ -175,7 +178,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                     <Ionicons 
                                         name="lock-closed-outline" 
                                         size={20} 
-                                        color={focusedInput === 'new' ? '#007AFF' : '#999'} 
+                                        color={theme} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
@@ -197,7 +200,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         <Ionicons 
                                             name={showNewPassword ? 'eye' : 'eye-off'} 
                                             size={22} 
-                                            color={focusedInput === 'new' ? '#007AFF' : '#6b7280'} 
+                                            color={theme} 
                                         />
                                     </TouchableOpacity>
                                 </View>
@@ -234,7 +237,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                     <Ionicons 
                                         name="lock-closed-outline" 
                                         size={20} 
-                                        color={focusedInput === 'confirm' ? '#007AFF' : '#999'} 
+                                        color={theme} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
@@ -256,7 +259,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         <Ionicons 
                                             name={showConfirmPassword ? 'eye' : 'eye-off'} 
                                             size={22} 
-                                            color={focusedInput === 'confirm' ? '#007AFF' : '#6b7280'} 
+                                            color={theme} 
                                         />
                                     </TouchableOpacity>
                                 </View>
@@ -294,7 +297,8 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             style={[
                                 styles.modalButton, 
                                 styles.saveButton,
-                                (isUpdatingPassword || isReauthenticating) && styles.buttonDisabled
+                                (isUpdatingPassword || isReauthenticating) && styles.buttonDisabled,
+                                {backgroundColor: theme}
                             ]}
                             onPress={handleChangePassword}
                             disabled={isUpdatingPassword || isReauthenticating}
@@ -309,7 +313,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             )}
                         </TouchableOpacity>
                     </View>
-                    </View>
+                </SafeAreaView>
                 </View>
             </KeyboardAvoidingView>
         </Modal>
@@ -399,6 +403,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fafafa',
         paddingHorizontal: 4,
         minHeight: 52,
+        maxHeight: "90%"
     },
     passwordInputContainerFocused: {
         borderColor: '#007AFF',
@@ -488,14 +493,15 @@ const styles = StyleSheet.create({
     },
     modalButton: {
         flex: 1,
-        paddingVertical: 16,
+        paddingVertical: 0,
         paddingHorizontal: 20,
         borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
         gap: 8,
-        minHeight: 52,
+        minHeight: 60,
+        maxHeight: "90%"
     },
     buttonDisabled: {
         opacity: 0.6,
@@ -509,7 +515,6 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     saveButton: {
-        backgroundColor: '#007AFF',
         shadowColor: '#007AFF',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,

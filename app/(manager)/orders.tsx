@@ -5,17 +5,20 @@ import { useTables } from '@/firebase/hooks/useTable';
 import type { Order } from '@/firebase/types';
 import { useAuth } from '@/firebase/hooks/useAuth';
 import { useUser, useUsersByRestaurant } from '@/firebase/hooks/useUsers';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import BillModal from '@/components/BillModal';
+import { Container } from '@/components/Container';
 import { useBillsByOrder } from '@/firebase/hooks/useBill';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
 import { useMenuItems } from '@/firebase/hooks/useMenuItem';
 import { MaterialIcons } from '@expo/vector-icons';
+import { ArrowLeft } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
 export default function Orders() {
   const { currentUser } = useAuth();
   const userData = useUser(currentUser?.uid || '').data;
   const restaurantId = userData?.restaurantId || '';
+  const router = useRouter();
 
   const { data: orders, isLoading: isLoadingOrders } = useOrdersByRestaurant(restaurantId);
   const { data: tables } = useTables(restaurantId);
@@ -196,15 +199,15 @@ export default function Orders() {
     };
 
     return (
-      <View style={[styles.orderCard, { borderLeftColor: statusColor }]}>
+      <View style={[styles.orderCard, { borderLeftColor: "#104A9c" }]}>
         <TouchableOpacity 
           activeOpacity={0.7}
           onPress={toggleExpand}
         >
           <View style={styles.orderHeader}>
             <View style={styles.orderHeaderLeft}>
-              <View style={[styles.tableBadge, { backgroundColor: statusColor + '15' }]}>
-                <Text style={[styles.tableBadgeText, { color: statusColor }]}>
+              <View style={[styles.tableBadge, { backgroundColor: "#104A9c" + '15' }]}>
+                <Text style={[styles.tableBadgeText, { color: "#104A9c" }]}>
                   {tableNumber}
                 </Text>
               </View>
@@ -214,8 +217,8 @@ export default function Orders() {
               </View>
             </View>
             <View style={styles.orderHeaderRight}>
-              <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
-                <Text style={[styles.statusText, { color: statusColor }]}>
+              <View style={[styles.statusBadge, { backgroundColor: "#104A9c" + '20' }]}>
+                <Text style={[styles.statusText, { color: "#104A9c" }]}>
                   {item.status}
                 </Text>
               </View>
@@ -240,8 +243,8 @@ export default function Orders() {
             {billExists && bill && (
               <View style={styles.orderDetailRow}>
                 <Text style={styles.detailLabel}>Bill Status:</Text>
-                <View style={[styles.paymentStatusBadge, { backgroundColor: bill.payment_status === 'Paid' ? '#34c75920' : bill.payment_status === 'Failed' ? '#ff3b3020' : '#ff9f0a20' }]}>
-                  <Text style={[styles.paymentStatusText, { color: bill.payment_status === 'Paid' ? '#34c759' : bill.payment_status === 'Failed' ? '#ff3b30' : '#ff9f0a' }]}>
+                <View style={[styles.paymentStatusBadge, { backgroundColor: "#104A9c20" }]}>
+                  <Text style={[styles.paymentStatusText, { color: "#104A9c" }]}>
                     {bill.payment_status}
                   </Text>
                 </View>
@@ -291,11 +294,11 @@ export default function Orders() {
                   </View>
                   <View style={[
                     styles.deliveryStatusBadge,
-                    { backgroundColor: orderItem.delivered ? '#34c75920' : '#ff9f0a20' }
+                    { backgroundColor: "#104A9c20" }
                   ]}>
                     <Text style={[
                       styles.deliveryStatusText,
-                      { color: orderItem.delivered ? '#34c759' : '#ff9f0a' }
+                      { color: "#104A9c" }
                     ]}>
                       {orderItem.delivered ? 'Delivered' : 'Pending'}
                     </Text>
@@ -335,8 +338,8 @@ export default function Orders() {
                 </View>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Payment Status:</Text>
-                  <View style={[styles.paymentStatusBadge, { backgroundColor: bill.payment_status === 'Paid' ? '#34c75920' : bill.payment_status === 'Failed' ? '#ff3b3020' : '#ff9f0a20' }]}>
-                    <Text style={[styles.paymentStatusText, { color: bill.payment_status === 'Paid' ? '#34c759' : bill.payment_status === 'Failed' ? '#ff3b30' : '#ff9f0a' }]}>
+                  <View style={[styles.paymentStatusBadge, { backgroundColor: "#104A9c20" }]}>
+                    <Text style={[styles.paymentStatusText, { color: "#104A9c" }]}>
                       {bill.payment_status}
                     </Text>
                   </View>
@@ -397,14 +400,14 @@ export default function Orders() {
                 </TouchableOpacity>
               )}
               
-              {billExists && (
+              {billExists && orderFilter !== 'active' && (
                 <TouchableOpacity
-                  style={styles.viewBillButton}
+                  style={[styles.viewBillButton, {backgroundColor: "#104A9c"}]}
                   onPress={handleViewBill}
                   activeOpacity={0.7}
                 >
-                  <MaterialIcons name="receipt-long" size={18} color="#34c759" />
-                  <Text style={styles.viewBillButtonText}>View Bill</Text>
+                  <MaterialIcons name="receipt-long" size={18} color="#fff" />
+                  <Text style={[styles.viewBillButtonText, {color: "#fff"}]}>View Bill</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -426,16 +429,16 @@ export default function Orders() {
 
   if (isLoadingOrders) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <Container>
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#104A9c" />
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container>
       <View style={styles.container}>
         {/* <View style={styles.headerContainer}>
           <Text style={styles.header}>Orders</Text>
@@ -445,6 +448,12 @@ export default function Orders() {
               : `${completedOrders.length} completed`}
           </Text>
         </View> */}
+        <View style={styles.headerContainer}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft />
+          </TouchableOpacity>
+          <Text style={styles.header}>Menu Items</Text>
+        </View>
 
         {/* Filter Tabs */}
         <View style={styles.filterContainer}>
@@ -515,17 +524,14 @@ export default function Orders() {
           onClose={handleCloseBillModal}
           order={selectedOrderForBill}
           restaurantId={restaurantId}
+          theme='#104A9c'
         />
       </View>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
   container: {
     flex: 1,
     padding: 16,
@@ -537,9 +543,12 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     marginBottom: 20,
+    flexDirection: "row",
+    gap:8,
+    alignItems: "center"
   },
   header: {
-    fontSize: 32,
+    fontSize: 22,
     fontWeight: '800',
     color: '#1a1a1a',
     letterSpacing: -0.5,
@@ -846,7 +855,7 @@ const styles = StyleSheet.create({
   viewBillButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#34c75915',
+    backgroundColor: '#104A9c15',
     borderRadius: 12,
     paddingVertical: 10,
     paddingHorizontal: 16,
@@ -855,7 +864,7 @@ const styles = StyleSheet.create({
     minWidth: '45%',
   },
   viewBillButtonText: {
-    color: '#34c759',
+    color: '#104A9c',
     fontSize: 14,
     fontWeight: '600',
   },

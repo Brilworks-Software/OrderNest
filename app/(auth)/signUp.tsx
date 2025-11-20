@@ -14,8 +14,8 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../firebase/hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Hotel } from 'lucide-react-native';
+import { Container } from '@/components/Container';
 
 export default function SignUp() {
   const router = useRouter();
@@ -80,7 +80,7 @@ export default function SignUp() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container style={{ backgroundColor: '#f3f4f6', padding: 0 }}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -260,15 +260,11 @@ export default function SignUp() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f3f4f6',
-  },
   container: {
     flex: 1,
     backgroundColor: '#f3f4f6',

@@ -15,8 +15,8 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { Restaurant } from '../../firebase/types';
 import { useAuth } from '@/firebase/hooks/useAuth';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUploadImage } from '@/firebase/hooks/useImageUpload';
+import { Container } from '@/components/Container';
 import {useCreateRestaurant} from '@/firebase/hooks/useRestaurant';
 import { useUpdateUser } from '@/firebase/hooks/useUsers';
 import { router } from 'expo-router';
@@ -185,7 +185,7 @@ export default function Onboarding() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container style={{ backgroundColor: '#f3f4f6', padding: 0 }}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -199,7 +199,7 @@ export default function Onboarding() {
         >
           <View style={styles.header}>
             <View style={styles.logoContainer}>
-              <Hotel size={32} color="#3b82f6" />
+              <Hotel size={32} color="#104A9c" />
             </View>
             <Text style={styles.title}>Restaurant Setup</Text>
             <Text style={styles.subtitle}>Let's get your restaurant ready to serve</Text>
@@ -218,7 +218,7 @@ export default function Onboarding() {
                 <Ionicons 
                   name="restaurant" 
                   size={20} 
-                  color={focusedInput === 'name' ? '#3b82f6' : '#6b7280'} 
+                  color={focusedInput === 'name' ? '#3b82f6' : '#104A9c'} 
                   style={styles.icon} 
                 />
                 <TextInput
@@ -245,7 +245,7 @@ export default function Onboarding() {
                 <Ionicons 
                   name="location" 
                   size={20} 
-                  color={focusedInput === 'address' ? '#3b82f6' : '#6b7280'} 
+                  color={focusedInput === 'address' ? '#3b82f6' : '#104A9c'} 
                   style={styles.icon} 
                 />
                 <TextInput
@@ -275,7 +275,7 @@ export default function Onboarding() {
                 <Ionicons 
                   name="document-text" 
                   size={20} 
-                  color={focusedInput === 'gstNumber' ? '#3b82f6' : '#6b7280'} 
+                  color={focusedInput === 'gstNumber' ? '#3b82f6' : '#104A9c'} 
                   style={styles.icon} 
                 />
                 <TextInput
@@ -303,7 +303,7 @@ export default function Onboarding() {
                   <Ionicons 
                     name="calculator" 
                     size={20} 
-                    color={focusedInput === 'gstPercentage' ? '#3b82f6' : '#6b7280'} 
+                    color={focusedInput === 'gstPercentage' ? '#3b82f6' : '#104A9c'} 
                     style={styles.icon} 
                   />
                   <TextInput
@@ -331,7 +331,7 @@ export default function Onboarding() {
                   <Ionicons 
                     name="card" 
                     size={20} 
-                    color={focusedInput === 'serviceCharge' ? '#3b82f6' : '#6b7280'} 
+                    color={focusedInput === 'serviceCharge' ? '#3b82f6' : '#104A9c'} 
                     style={styles.icon} 
                   />
                   <TextInput
@@ -351,12 +351,12 @@ export default function Onboarding() {
             <View style={styles.imageSection}>
               <Text style={styles.imageLabel}>Restaurant Image</Text>
               <TouchableOpacity
-                style={styles.imagePickerButton}
+                style={[styles.imagePickerButton,{borderColor: "#104A9c", backgroundColor: "#104A9c15"}]}
                 onPress={pickImage}
                 disabled={loading}
                 activeOpacity={0.7}
               >
-                <Ionicons name="image-outline" size={24} color="#3b82f6" />
+                <Ionicons name="image-outline" size={24} color="#104A9c" />
                 <Text style={styles.imagePickerText}>
                   {imageURL ? 'Change Image' : 'Select Image'}
                 </Text>
@@ -413,15 +413,11 @@ export default function Onboarding() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f3f4f6',
-  },
   container: {
     flex: 1,
     backgroundColor: '#f3f4f6',
@@ -551,7 +547,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   imagePickerText: {
-    color: '#3b82f6',
+    color: '#104A9c',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -613,7 +609,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     height: 56,
     borderRadius: 12,
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#104A9c',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#3b82f6',

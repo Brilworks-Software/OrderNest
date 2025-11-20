@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Hotel } from 'lucide-react-native';
 import { useAuth } from '../firebase/hooks/useAuth';
 import {userStore}  from '@/firebase/stores/userStore';
 import { useUser } from '@/firebase/hooks/useUsers';
+import { Container } from '@/components/Container';
 
 export default function IndexScreen() {
   const { currentUser, isLoadingUser } = useAuth();
@@ -51,7 +51,7 @@ export default function IndexScreen() {
 
   if (isInitializing || isLoadingUser) {
     return (
-      <SafeAreaView style={styles.container}>
+      <Container style={{ backgroundColor: '#3B82F6', padding: 0 }}>
         <View style={styles.loadingContainer}>
           <View style={styles.logo}>
             <Hotel size={40} color="#ffffff" />
@@ -64,7 +64,7 @@ export default function IndexScreen() {
             <View style={[styles.dot, styles.dot3]} />
           </View>
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
@@ -72,10 +72,6 @@ export default function IndexScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#3B82F6',
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',

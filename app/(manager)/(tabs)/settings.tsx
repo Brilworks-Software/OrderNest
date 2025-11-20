@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator, Platform, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/firebase/hooks/useAuth';
+import { Container } from '@/components/Container';
 import { useUser } from '@/firebase/hooks/useUsers';
 import { useRestaurant, useUpdateRestaurant } from '@/firebase/hooks/useRestaurant';
 import { router } from 'expo-router';
@@ -66,16 +66,19 @@ export default function Settings() {
 
     if (isLoadingUser || isLoadingRestaurant) {
         return (
-            <SafeAreaView style={styles.container}>
+            <Container>
                 <View style={styles.center}>
                     <ActivityIndicator size="large" />
                 </View>
-            </SafeAreaView>
+            </Container>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <Container>
+            <View style={styles.headerContainer}>
+        <Text style={styles.header}>Settings</Text>
+      </View>
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 {/* Profile Header Section */}
                 <View style={styles.profileSection}>
@@ -84,7 +87,7 @@ export default function Settings() {
                             <Image source={{ uri: userData.photoURL }} style={styles.profileImage} />
                         ) : (
                             <View style={styles.profileImagePlaceholder}>
-                                <MaterialIcons name="person" size={40} color="#666" />
+                                <MaterialIcons name="person" size={40} color="#104A9c" />
                             </View>
                         )}
                     </View>
@@ -102,7 +105,7 @@ export default function Settings() {
                 {restaurant && (
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
-                            <MaterialIcons name="restaurant" size={20} color="#333" style={{ marginRight: 8 }} />
+                            <MaterialIcons name="restaurant" size={20} color="#104A9c" style={{ marginRight: 8 }} />
                             <Text style={styles.sectionTitle}>Restaurant Information</Text>
                         </View>
                         <View style={styles.infoCard}>
@@ -156,7 +159,7 @@ export default function Settings() {
                 {/* Account Settings Section */}
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <MaterialIcons name="settings" size={20} color="#333" style={{ marginRight: 8 }} />
+                        <MaterialIcons name="settings" size={20} color="#104A9c" style={{ marginRight: 8 }} />
                         <Text style={styles.sectionTitle}>Account Settings</Text>
                     </View>
 
@@ -230,6 +233,7 @@ export default function Settings() {
                 isReauthenticating={isReauthenticating}
                 onClose={() => setPasswordModalVisible(false)}
                 onUpdatePassword={handleChangePassword}
+                theme='#104A9c'
             />
 
             {/* Edit Restaurant Info Modal */}
@@ -240,7 +244,7 @@ export default function Settings() {
                 updateRestaurantMutation={updateRestaurantMutation}
                 onClose={() => setRestaurantModalVisible(false)}
             />
-        </SafeAreaView>
+        </Container>
     );
 }
 
@@ -256,6 +260,16 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    headerContainer: {
+      marginBottom: 20,
+      marginLeft: 16
+    },
+    header: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: '#333',
+      letterSpacing: -0.5,
     },
     // Profile Section
     profileSection: {

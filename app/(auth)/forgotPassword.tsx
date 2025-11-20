@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ActivityIndicator, Platform, KeyboardAvoidingView, ScrollView } from 'react-native'
 import React, { useState, useRef } from 'react'
 import { useAuth } from '../../firebase/hooks/useAuth'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { Hotel } from 'lucide-react-native'
 import { useRouter } from 'expo-router'
+import { Container } from '@/components/Container'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -46,7 +46,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container style={{ backgroundColor: '#f3f4f6', padding: 0 }}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -150,15 +150,11 @@ export default function ForgotPassword() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </Container>
   )
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f3f4f6',
-  },
   container: {
     flex: 1,
     backgroundColor: '#f3f4f6',

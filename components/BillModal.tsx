@@ -8,18 +8,20 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Order, MenuItem } from '@/firebase/types';
 import { useMenuItems } from '@/firebase/hooks/useMenuItem';
 import { useRestaurant } from '@/firebase/hooks/useRestaurant';
 import { useCreateBill, useUpdateBill, useBillsByOrder } from '@/firebase/hooks/useBill';
 import { useTables, useUpdateTableStatus } from '@/firebase/hooks/useTable';
-import { useUpdateOrderStatus } from '@/firebase/hooks/useOrder';
+import { useUpdateOrderStatus, useOrder } from '@/firebase/hooks/useOrder';
 
 interface BillModalProps {
   visible: boolean;
   onClose: () => void;
   order: Order | null;
   restaurantId: string;
+  theme: string
 }
 
 interface BillItem {
@@ -37,6 +39,7 @@ export default function BillModal({
   onClose,
   order,
   restaurantId,
+  theme,
 }: BillModalProps) {
   const { data: menuItems } = useMenuItems(restaurantId);
   const { data: restaurant } = useRestaurant(restaurantId);
@@ -49,29 +52,47 @@ export default function BillModal({
   // Get existing bill if it exists
   const { data: bills } = useBillsByOrder(order?.id || '');
   const existingBill = bills && bills.length > 0 ? bills[0] : null;
+  
+  // Get real-time order data to ensure we have the latest status
+  const { data: currentOrder } = useOrder(order?.id || '');
+  const orderToUse = currentOrder || order; // Use real-time data if available, fallback to prop
+  
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('Pending');
   
-  // Update payment status when bill is loaded
+  // Update payment status when bill is loaded or modal opens
   useEffect(() => {
-    if (existingBill?.payment_status) {
-      setPaymentStatus(existingBill.payment_status as PaymentStatus);
-    } else {
-      setPaymentStatus('Pending');
+    if (visible) {
+      if (existingBill?.payment_status) {
+        setPaymentStatus(existingBill.payment_status as PaymentStatus);
+      } else {
+        setPaymentStatus('Pending');
+      }
     }
-  }, [existingBill]);
-  
-  // Reset payment status when modal closes
+  }, [existingBill, visible]);
+
+  // Reset payment status when modal closes (discard unsaved changes)
   useEffect(() => {
     if (!visible) {
-      setPaymentStatus('Pending');
+      // Reset to the saved payment status when modal closes
+      if (existingBill?.payment_status) {
+        setPaymentStatus(existingBill.payment_status as PaymentStatus);
+      } else {
+        setPaymentStatus('Pending');
+      }
     }
-  }, [visible]);
+  }, [visible, existingBill]);
 
   // Get table number
   const tableNumber = useMemo(() => {
     if (!order || !tables) return '';
     const table = tables.find(t => t.id === order.table_id);
     return table?.table_number || '';
+  }, [order, tables]);
+
+  const tableName = useMemo(() => {
+    if (!order || !tables) return '';
+    const table = tables.find(t => t.id === order.table_id);
+    return table?.table_name || `Table ${table?.table_number}`;
   }, [order, tables]);
 
   // Calculate bill items with menu item details
@@ -151,7 +172,7 @@ export default function BillModal({
         });
 
         // Only update order status if it's not already completed
-        if (order.status !== 'completed') {
+        if (orderToUse?.status !== 'completed') {
           await updateOrderStatusMutation.mutateAsync({
             orderId: order.id,
             status: 'completed',
@@ -185,13 +206,12 @@ export default function BillModal({
           status: 'available',
         });
 
-        // Update order status to completed
-        if (order.status !== 'completed') {
-          await updateOrderStatusMutation.mutateAsync({
-            orderId: order.id,
-            status: 'completed',
-          });
-        }
+        // Always update order status to completed when payment is paid
+        // This ensures consistency even if status was changed multiple times
+        await updateOrderStatusMutation.mutateAsync({
+          orderId: order.id,
+          status: 'completed',
+        });
       } else if (newStatus === 'Pending' || newStatus === 'Failed') {
         // When payment is Pending or Failed, revert order status to pending
         // and mark table as occupied
@@ -200,25 +220,84 @@ export default function BillModal({
           status: 'occupied',
         });
 
-        // Update order status to pending
-        if (order.status !== 'pending') {
-          await updateOrderStatusMutation.mutateAsync({
-            orderId: order.id,
-            status: 'pending',
-          });
-        }
+        // Always update order status to pending when payment is not paid
+        // This ensures consistency even if status was changed multiple times
+        await updateOrderStatusMutation.mutateAsync({
+          orderId: order.id,
+          status: 'pending',
+        });
       }
     } catch (error) {
       console.error('Error updating payment status:', error); 
     }
   };
 
+  const handleDone = async () => {
+    if (!order || !existingBill) {
+      onClose();
+      return;
+    }
+
+    try {
+      // Check if payment status has changed and needs to be saved
+      if (paymentStatus !== existingBill.payment_status) {
+        // Save the payment status change
+        await updateBillMutation.mutateAsync({
+          billId: order.id,
+          updates: {
+            payment_status: paymentStatus,
+          },
+        });
+
+        // Update order status based on payment status
+        if (paymentStatus === 'Paid') {
+          // When bill is paid, mark table as free and order as completed
+          await updateTableStatusMutation.mutateAsync({
+            tableId: order.table_id,
+            status: 'available',
+          });
+
+          await updateOrderStatusMutation.mutateAsync({
+            orderId: order.id,
+            status: 'completed',
+          });
+        } else if (paymentStatus === 'Pending' || paymentStatus === 'Failed') {
+          // When payment is Pending or Failed, revert order status to pending
+          // and mark table as occupied
+          await updateTableStatusMutation.mutateAsync({
+            tableId: order.table_id,
+            status: 'occupied',
+          });
+
+          await updateOrderStatusMutation.mutateAsync({
+            orderId: order.id,
+            status: 'pending',
+          });
+        }
+      }
+
+      // Wait for any pending mutations to complete before closing
+      // This ensures all changes are saved
+      while (updateBillMutation.isPending || 
+             updateTableStatusMutation.isPending || 
+             updateOrderStatusMutation.isPending) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+
+      onClose();
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      // Still close the modal even if there's an error
+      onClose();
+    }
+  };
+
   const getPaymentStatusColor = (status: PaymentStatus) => {
     switch (status) {
       case 'Paid':
-        return '#34c759';
+        return '#10b981';
       case 'Failed':
-        return '#ff3b30';
+        return '#ff4444';
       case 'Pending':
       default:
         return '#ff9f0a';
@@ -235,7 +314,7 @@ export default function BillModal({
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
+        <SafeAreaView style={styles.modalContent} edges={['top', 'bottom']}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Bill</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -259,7 +338,7 @@ export default function BillModal({
             <View style={styles.orderInfo}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Table:</Text>
-                <Text style={styles.infoValue}>Table {tableNumber}</Text>
+                <Text style={styles.infoValue}>{tableName}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Order ID:</Text>
@@ -319,13 +398,10 @@ export default function BillModal({
                       },
                     ]}
                     onPress={() => {
-                      if (existingBill) {
-                        handleUpdatePaymentStatus(status);
-                      } else {
-                        setPaymentStatus(status);
-                      }
+                      // Only update local state, don't save until Done is pressed
+                      setPaymentStatus(status);
                     }}
-                    disabled={existingBill ? updateBillMutation.isPending : false}
+                    disabled={false}
                     activeOpacity={0.7}
                   >
                     <View
@@ -348,10 +424,15 @@ export default function BillModal({
                   </TouchableOpacity>
                 ))}
               </View>
+              {existingBill && paymentStatus !== existingBill.payment_status && (
+                <View style={styles.unsavedIndicator}>
+                  <Text style={styles.unsavedText}>⚠️ Changes not saved</Text>
+                </View>
+              )}
               {existingBill && updateBillMutation.isPending && (
                 <View style={styles.updatingIndicator}>
-                  <ActivityIndicator size="small" color="#0a84ff" />
-                  <Text style={styles.updatingText}>Updating...</Text>
+                  <ActivityIndicator size="small" color="#10b981" />
+                  <Text style={styles.updatingText}>Saving...</Text>
                 </View>
               )}
             </View>
@@ -383,13 +464,13 @@ export default function BillModal({
               </View>
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Discount:</Text>
-                <Text style={[styles.summaryValue, styles.discountValue]}>
+                <Text style={[styles.summaryValue, {color: theme}]}>
                   -₹{billCalculation.discount.toFixed(2)}
                 </Text>
               </View>
               <View style={[styles.summaryRow, styles.grandTotalRow]}>
                 <Text style={styles.grandTotalLabel}>Grand Total:</Text>
-                <Text style={styles.grandTotalValue}>
+                <Text style={[styles.grandTotalValue, { color:theme}]}>
                   ₹{billCalculation.grandTotal.toFixed(2)}
                 </Text>
               </View>
@@ -423,15 +504,30 @@ export default function BillModal({
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                style={styles.updateBillButton}
-                onPress={onClose}
+                style={[
+                  styles.updateBillButton,
+                  (updateBillMutation.isPending || 
+                   updateTableStatusMutation.isPending || 
+                   updateOrderStatusMutation.isPending) && styles.updateBillButtonDisabled,
+                   {backgroundColor: theme}
+                ]}
+                onPress={handleDone}
+                disabled={updateBillMutation.isPending || 
+                         updateTableStatusMutation.isPending || 
+                         updateOrderStatusMutation.isPending}
                 activeOpacity={0.7}
               >
-                <Text style={styles.updateBillButtonText}>Done</Text>
+                {(updateBillMutation.isPending || 
+                  updateTableStatusMutation.isPending || 
+                  updateOrderStatusMutation.isPending) ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.updateBillButtonText}>Done</Text>
+                )}
               </TouchableOpacity>
             )}
           </View>
-        </View>
+        </SafeAreaView>
       </View>
     </Modal>
   );
@@ -445,10 +541,11 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#fff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
     minHeight: '90%',
     paddingBottom: 20,
+    maxHeight: "97%"
   },
   modalHeader: {
     flexDirection: 'row',
@@ -461,13 +558,13 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: '#333',
   },
   closeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f5f5f5',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -488,18 +585,18 @@ const styles = StyleSheet.create({
   restaurantName: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     marginBottom: 4,
   },
   restaurantAddress: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     textAlign: 'center',
     marginBottom: 4,
   },
   gstNumber: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#666',
   },
   orderInfo: {
     paddingVertical: 16,
@@ -511,17 +608,17 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     fontWeight: '500',
   },
   infoValue: {
     fontSize: 14,
-    color: '#1a1a1a',
+    color: '#333',
     fontWeight: '600',
   },
   divider: {
     height: 1,
-    backgroundColor: '#e5e5ea',
+    backgroundColor: '#e0e0e0',
     marginVertical: 16,
   },
   itemsSection: {
@@ -530,7 +627,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     marginBottom: 12,
   },
   billItemRow: {
@@ -546,17 +643,17 @@ const styles = StyleSheet.create({
   billItemName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#333',
     marginBottom: 4,
   },
   billItemQty: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#666',
   },
   billItemTotal: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
   },
   summarySection: {
     marginBottom: 20,
@@ -568,32 +665,32 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 15,
-    color: '#6b7280',
+    color: '#666',
     fontWeight: '500',
   },
   summaryValue: {
     fontSize: 15,
-    color: '#1a1a1a',
+    color: '#333',
     fontWeight: '600',
   },
   discountValue: {
-    color: '#34c759',
+    color: '#10b981',
   },
   grandTotalRow: {
     marginTop: 8,
     paddingTop: 16,
     borderTopWidth: 2,
-    borderTopColor: '#e5e5ea',
+    borderTopColor: '#e0e0e0',
   },
   grandTotalLabel: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
   },
   grandTotalValue: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#0a84ff',
+    color: '#10b981',
   },
   actionButtons: {
     flexDirection: 'row',
@@ -605,20 +702,22 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#333',
   },
   createBillButton: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: '#34c759',
+    backgroundColor: '#10b981',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -659,7 +758,19 @@ const styles = StyleSheet.create({
   paymentStatusText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    color: '#666',
+  },
+  unsavedIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    gap: 8,
+  },
+  unsavedText: {
+    fontSize: 13,
+    color: '#ff9f0a',
+    fontWeight: '600',
   },
   updatingIndicator: {
     flexDirection: 'row',
@@ -670,16 +781,19 @@ const styles = StyleSheet.create({
   },
   updatingText: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#666',
     fontWeight: '500',
   },
   updateBillButton: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: '#0a84ff',
+    backgroundColor: '#10b981',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  updateBillButtonDisabled: {
+    backgroundColor: '#e5e5ea',
   },
   updateBillButtonText: {
     fontSize: 16,

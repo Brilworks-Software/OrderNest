@@ -19,7 +19,7 @@ export default function TabLayout() {
         name="home"
         options={{
           title: "home",
-          tabBarIcon: ({ color }) => <FontAwesome name="home" size={22} color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome name="home" size={22} color={"#ff4444"} />,
           headerShown: false,
         }}
       />
@@ -27,14 +27,16 @@ export default function TabLayout() {
           name="menuItems"
           options={{
             title: 'Menu Items',
-            tabBarIcon: ({ color }) => <MaterialIcons name="food-bank" size={24} color={color}/>,
+            tabBarIcon: ({ color }) => <MaterialIcons name="food-bank" size={24} color={'#ff4444'}/>,
+            headerShown: false
           }}
         />
       <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color }) => <MaterialIcons name="settings" size={24} color={color}/>,
+          tabBarIcon: ({ color }) => <MaterialIcons name="settings" size={24} color={'#ff4444'}/>,
+          headerShown:false,
         }}
       />
     </Tabs>

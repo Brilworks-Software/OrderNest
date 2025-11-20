@@ -5,14 +5,16 @@ import {
     Modal,
     TextInput,
     ScrollView,
-    Pressable,
     Switch,
     StyleSheet,
     Image,
-    Alert,
     Platform,
     KeyboardAvoidingView,
+    TouchableOpacity,
+    ActivityIndicator,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import { useUploadImage } from '../firebase/hooks/useImageUpload' // added
 
@@ -49,6 +51,8 @@ export default function AddMenuItemModal({
     const [imageUrl, setImageUrl] = useState('') // may hold local uri or remote url
     const [available, setAvailable] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
+    const [focusedInput, setFocusedInput] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string>('');
 
     // hook to upload image
     const upload = useUploadImage()
@@ -75,6 +79,8 @@ export default function AddMenuItemModal({
             setPrice('0.00')
             setImageUrl('')
             setAvailable(true)
+            setErrorMessage('')
+            setFocusedInput(null)
         }
     }, [visible, initialItem])
 
@@ -108,45 +114,30 @@ export default function AddMenuItemModal({
     async function handleSave() {
         // basic validation
         setIsLoading(true)
+        setErrorMessage('')
 
         // validate required fields
         if (!name.trim()) {
-            if (Platform.OS === 'web') {
-                alert('Validation error: Name is required.')
-            } else {
-                Alert.alert('Validation error', 'Name is required.')
-            }
+            setErrorMessage('Name is required.')
             setIsLoading(false)
             return
         }
 
         if (!category.trim()) {
-            if (Platform.OS === 'web') {
-                alert('Validation error: Category is required.')
-            } else {
-                Alert.alert('Validation error', 'Category is required.')
-            }
+            setErrorMessage('Category is required.')
             setIsLoading(false)
             return
         }
 
         if (!description.trim()) {
-            if (Platform.OS === 'web') {
-                alert('Validation error: Description is required.')
-            } else {
-                Alert.alert('Validation error', 'Description is required.')
-            }
+            setErrorMessage('Description is required.')
             setIsLoading(false)
             return
         }
 
         const parsedPrice = parseFloat(price || '')
         if (isNaN(parsedPrice) || parsedPrice < 0) {
-            if (Platform.OS === 'web') {
-                alert('Validation error: Please enter a valid non-negative price.')
-            } else {
-                Alert.alert('Validation error', 'Please enter a valid non-negative price.')
-            }
+            setErrorMessage('Please enter a valid non-negative price.')
             setIsLoading(false)
             return
         }
@@ -155,11 +146,7 @@ export default function AddMenuItemModal({
 
         let finalImageUrl = imageUrl.trim()
         if (finalImageUrl === '') {
-            if (Platform.OS === 'web') {
-                alert('Validation error: Please select an image for the menu item.')
-            } else {
-                Alert.alert('Validation error', 'Please select an image for the menu item.')
-            }
+            setErrorMessage('Please select an image for the menu item.')
             setIsLoading(false)
             return
         }
@@ -174,11 +161,7 @@ export default function AddMenuItemModal({
                 finalImageUrl = await upload.mutateAsync({ folderPath, fileUri: finalImageUrl, customName: id })
             } catch (err) {
                 console.log(err)
-                if (Platform.OS === 'web') {
-                    alert('Upload failed: Could not upload image. Please try again.')
-                } else {
-                    Alert.alert('Upload failed', 'Could not upload image. Please try again.')
-                }
+                setErrorMessage('Could not upload image. Please try again.')
                 setIsLoading(false)
                 return
             }
@@ -202,127 +185,517 @@ export default function AddMenuItemModal({
     const isEdit = Boolean(initialItem)
 
     return (
-        <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+        <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
             <KeyboardAvoidingView 
-                style={{ flex: 1 }} 
+                style={localStyles.keyboardAvoidingView}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
             >
-                <View style={localStyles.modalContainer}>
-                    <View style={localStyles.modalContent}>
-                        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-                        <Text style={localStyles.header}>{isEdit ? 'Edit Menu Item' : 'Add Menu Item'}</Text>
-
-                        <Text style={localStyles.label}>Name</Text>
-                        <TextInput style={localStyles.input} value={name} onChangeText={setName} placeholder="Item name" />
-
-                        <Text style={localStyles.label}>Category</Text>
-                        <TextInput style={localStyles.input} value={category} onChangeText={setCategory} placeholder="e.g. Drinks, ice-creams" />
-
-                        <Text style={localStyles.label}>Description</Text>
-                        <TextInput style={[localStyles.input, { height: 80 }]} multiline value={description} onChangeText={setDescription} placeholder="Describe item" />
-
-                        <Text style={localStyles.label}>Price</Text>
-                        <TextInput
-                            style={localStyles.input}
-                            value={price}
-                            onChangeText={t => setPrice(t.replace(/[^0-9.]/g, ''))}
-                            keyboardType="decimal-pad"
-                            placeholder="0.00"
-                        />
-
-                        <Text style={localStyles.label}>Image</Text>
-
-                        {imageUrl ? (
-                            <View style={{ marginBottom: 8 }}>
-                                <Image source={{ uri: imageUrl }} style={localStyles.previewImage} resizeMode="cover" />
-                                
+                <View style={localStyles.modalOverlay}>
+                    <SafeAreaView style={localStyles.modalContainer} edges={['top', 'bottom']}>
+                        {/* Header */}
+                        <View style={localStyles.modalHeader}>
+                            <View style={localStyles.headerContent}>
+                                <Ionicons 
+                                    name="restaurant-outline" 
+                                    size={24} 
+                                    color="#104A9c" 
+                                    style={localStyles.headerIcon} 
+                                />
+                                <Text style={localStyles.modalTitle}>
+                                    {isEdit ? 'Edit Menu Item' : 'Add Menu Item'}
+                                </Text>
                             </View>
-                        ) : null}
-
-                        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-                            <Pressable onPress={pickImage} style={[localStyles.saveButton, { backgroundColor: '#0078d4', paddingHorizontal: 12 }]}>
-                                <Text style={{ color: '#fff' }}>Select Image</Text>
-                            </Pressable>
-                            <Pressable onPress={() => setImageUrl('')} style={[localStyles.cancelButton, { paddingHorizontal: 12 }]}>
-                                <Text style={{ color: '#333' }}>Clear</Text>
-                            </Pressable>
+                            <TouchableOpacity
+                                style={localStyles.closeButton}
+                                onPress={onClose}
+                                disabled={isLoading}
+                            >
+                                <Ionicons name="close" size={24} color="#666" />
+                            </TouchableOpacity>
                         </View>
 
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-                            <Text style={localStyles.label}>Available</Text>
-                            <Switch value={available} onValueChange={setAvailable} />
-                        </View>
+                        {/* Form Content */}
+                        <ScrollView 
+                            style={localStyles.scrollView}
+                            contentContainerStyle={localStyles.scrollContent}
+                            showsVerticalScrollIndicator={false}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            <View style={localStyles.formContent}>
+                                {/* Name */}
+                                <View style={localStyles.inputGroup}>
+                                    <Text style={localStyles.label}>Name</Text>
+                                    <View style={[
+                                        localStyles.inputContainer,
+                                        focusedInput === 'name' && localStyles.inputContainerFocused,
+                                        errorMessage && focusedInput === 'name' && localStyles.inputContainerError
+                                    ]}>
+                                        <Ionicons 
+                                            name="restaurant-outline" 
+                                            size={20} 
+                                            color={focusedInput === 'name' ? '#007AFF' : '#104A9c'} 
+                                            style={localStyles.inputIcon}
+                                        />
+                                        <TextInput
+                                            style={localStyles.input}
+                                            value={name}
+                                            onChangeText={(t) => {
+                                                setName(t)
+                                                if (errorMessage) setErrorMessage('')
+                                            }}
+                                            placeholder="Item name"
+                                            placeholderTextColor="#999"
+                                            editable={!isLoading}
+                                        />
+                                    </View>
+                                </View>
 
-                        <View style={localStyles.modalButtons}>
-                            <Pressable style={localStyles.cancelButton} onPress={onClose}>
-                                <Text style={{ color: '#333' }}>Cancel</Text>
-                            </Pressable>
-                            <Pressable style={localStyles.saveButton} onPress={handleSave} disabled={isLoading || !name.trim()}>
-                                <Text style={{ color: '#fff' }}>{isLoading ? 'Uploading...' : (isEdit ? 'Save' : 'Create')}</Text>
-                            </Pressable>
+                                {/* Category */}
+                                <View style={localStyles.inputGroup}>
+                                    <Text style={localStyles.label}>Category</Text>
+                                    <View style={[
+                                        localStyles.inputContainer,
+                                        focusedInput === 'category' && localStyles.inputContainerFocused,
+                                        errorMessage && focusedInput === 'category' && localStyles.inputContainerError
+                                    ]}>
+                                        <Ionicons 
+                                            name="grid-outline" 
+                                            size={20} 
+                                            color={focusedInput === 'category' ? '#007AFF' : '#104A9c'} 
+                                            style={localStyles.inputIcon}
+                                        />
+                                        <TextInput
+                                            style={localStyles.input}
+                                            value={category}
+                                            onChangeText={(t) => {
+                                                setCategory(t)
+                                                if (errorMessage) setErrorMessage('')
+                                            }}
+                                            placeholder="e.g. Drinks, Ice-creams"
+                                            placeholderTextColor="#999"
+                                            editable={!isLoading}
+                                        />
+                                    </View>
+                                </View>
+
+                                {/* Description */}
+                                <View style={localStyles.inputGroup}>
+                                    <Text style={localStyles.label}>Description</Text>
+                                    <View style={[
+                                        localStyles.inputContainer,
+                                        localStyles.textAreaContainer,
+                                        focusedInput === 'description' && localStyles.inputContainerFocused,
+                                        errorMessage && focusedInput === 'description' && localStyles.inputContainerError
+                                    ]}>
+                                        <Ionicons 
+                                            name="document-text-outline" 
+                                            size={20} 
+                                            color={focusedInput === 'description' ? '#007AFF' : '#104A9c'} 
+                                            style={[localStyles.inputIcon, localStyles.textAreaIcon]}
+                                        />
+                                        <TextInput
+                                            style={[localStyles.input, localStyles.textArea]}
+                                            value={description}
+                                            onChangeText={(t) => {
+                                                setDescription(t)
+                                                if (errorMessage) setErrorMessage('')
+                                            }}
+                                            placeholder="Describe the item"
+                                            placeholderTextColor="#999"
+                                            multiline
+                                            numberOfLines={4}
+                                            editable={!isLoading}
+                                        />
+                                    </View>
+                                </View>
+
+                                {/* Price */}
+                                <View style={localStyles.inputGroup}>
+                                    <Text style={localStyles.label}>Price</Text>
+                                    <View style={[
+                                        localStyles.inputContainer,
+                                        focusedInput === 'price' && localStyles.inputContainerFocused,
+                                        errorMessage && focusedInput === 'price' && localStyles.inputContainerError
+                                    ]}>
+                                        <Ionicons 
+                                            name="cash-outline" 
+                                            size={20} 
+                                            color={focusedInput === 'price' ? '#007AFF' : '#104A9c'} 
+                                            style={localStyles.inputIcon}
+                                        />
+                                        <TextInput
+                                            style={localStyles.input}
+                                            value={price}
+                                            onChangeText={(t) => {
+                                                setPrice(t.replace(/[^0-9.]/g, ''))
+                                                if (errorMessage) setErrorMessage('')
+                                            }}
+                                            keyboardType="decimal-pad"
+                                            placeholder="0.00"
+                                            placeholderTextColor="#999"
+                                            editable={!isLoading}
+                                        />
+                                    </View>
+                                </View>
+
+                                {/* Image */}
+                                <View style={localStyles.inputGroup}>
+                                    <Text style={localStyles.label}>Image</Text>
+                                    {imageUrl ? (
+                                        <View style={localStyles.imagePreviewContainer}>
+                                            <Image 
+                                                source={{ uri: imageUrl }} 
+                                                style={localStyles.previewImage} 
+                                                resizeMode="cover" 
+                                            />
+                                            <TouchableOpacity
+                                                style={localStyles.removeImageButton}
+                                                onPress={() => {
+                                                    setImageUrl('')
+                                                    if (errorMessage) setErrorMessage('')
+                                                }}
+                                                disabled={isLoading}
+                                            >
+                                                <Ionicons name="close-circle" size={24} color="#ff4444" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    ) : (
+                                        <TouchableOpacity
+                                            style={localStyles.imagePickerButton}
+                                            onPress={pickImage}
+                                            disabled={isLoading}
+                                        >
+                                            <Ionicons name="image-outline" size={32} color="#007AFF" />
+                                            <Text style={localStyles.imagePickerText}>Select Image</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
+
+                                {/* Available Toggle */}
+                                <View style={localStyles.switchContainer}>
+                                    <View style={localStyles.switchLabelContainer}>
+                                        <Ionicons 
+                                            name={available ? "checkmark-circle" : "close-circle"} 
+                                            size={20} 
+                                            color={available ? "#104A9c" : "#999"} 
+                                        />
+                                        <Text style={localStyles.switchLabel}>Available</Text>
+                                    </View>
+                                    <Switch 
+                                        value={available} 
+                                        onValueChange={setAvailable}
+                                        trackColor={{ false: '#ccc', true: '#104A9c20' }}
+                                        thumbColor={available ? '#104A9c' : '#999'}
+                                        disabled={isLoading}
+                                    />
+                                </View>
+
+                                {/* Error Message */}
+                                {errorMessage && (
+                                    <View style={localStyles.errorContainer}>
+                                        <Ionicons name="alert-circle" size={18} color="#ff4444" />
+                                        <Text style={localStyles.errorText}>{errorMessage}</Text>
+                                    </View>
+                                )}
+                            </View>
+                        </ScrollView>
+
+                        {/* Actions */}
+                        <View style={localStyles.modalActions}>
+                            <TouchableOpacity
+                                style={[
+                                    localStyles.modalButton,
+                                    localStyles.cancelButton,
+                                    isLoading && localStyles.buttonDisabled
+                                ]}
+                                onPress={onClose}
+                                disabled={isLoading}
+                            >
+                                <Text style={localStyles.cancelButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    localStyles.modalButton,
+                                    localStyles.saveButton,
+                                    (isLoading || !name.trim()) && localStyles.buttonDisabled,
+                                    {backgroundColor: "#104A9c"}
+                                ]}
+                                onPress={handleSave}
+                                disabled={isLoading || !name.trim()}
+                            >
+                                {isLoading ? (
+                                    <ActivityIndicator size="small" color="#fff" />
+                                ) : (
+                                    <>
+                                        <Ionicons 
+                                            name={isEdit ? "checkmark-circle" : "add-circle"} 
+                                            size={20} 
+                                            color="#fff" 
+                                            style={localStyles.buttonIcon} 
+                                        />
+                                        <Text style={localStyles.saveButtonText}>
+                                            {isEdit ? 'Save' : 'Create'}
+                                        </Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
                         </View>
-                    </ScrollView>
+                    </SafeAreaView>
                 </View>
-            </View>
             </KeyboardAvoidingView>
         </Modal>
     )
 }
 
 const localStyles = StyleSheet.create({
-    modalContainer: {
+    keyboardAvoidingView: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
-        padding: 16,
+        alignItems: 'center',
     },
-    modalContent: {
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        paddingHorizontal: 20,
+    },
+    modalContainer: {
         backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 16,
+        borderRadius: 20,
+        width: '100%',
+        maxWidth: 500,
         maxHeight: '90%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 10,
+        overflow: 'hidden',
     },
-    header: { fontSize: 22, fontWeight: '700', marginBottom: 12 },
-    label: {
-        fontSize: 13,
-        color: '#333',
-        marginTop: 8,
-        marginBottom: 6,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        fontSize: 14,
-        backgroundColor: '#fff',
-    },
-    modalButtons: {
+    modalHeader: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
-        gap: 12,
-        marginTop: 16,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
     },
-    cancelButton: {
-        paddingHorizontal: 14,
-        paddingVertical: 10,
-        borderRadius: 8,
-        backgroundColor: '#eee',
+    headerContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    headerIcon: {
+        marginRight: 12,
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: '800',
+        color: '#1a1a1a',
+        letterSpacing: -0.5,
+    },
+    closeButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#f5f5f5',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    scrollView: {
+        maxHeight: '75%',
+    },
+    scrollContent: {
+        paddingBottom: 8,
+    },
+    formContent: {
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 12,
+    },
+    inputGroup: {
+        marginBottom: 16,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 10,
+        color: '#333',
+        letterSpacing: 0.2,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1.5,
+        borderColor: '#e0e0e0',
+        borderRadius: 12,
+        backgroundColor: '#fafafa',
+        paddingHorizontal: 4,
+        minHeight: 52,
+    },
+    inputContainerFocused: {
+        borderColor: '#007AFF',
+        backgroundColor: '#fff',
+        shadowColor: '#007AFF',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    inputContainerError: {
+        borderColor: '#ff4444',
+    },
+    textAreaContainer: {
+        alignItems: 'flex-start',
+        minHeight: 100,
+    },
+    inputIcon: {
+        marginLeft: 12,
         marginRight: 8,
     },
-    saveButton: {
-        paddingHorizontal: 14,
-        paddingVertical: 10,
-        borderRadius: 8,
-        backgroundColor: '#0078d4',
+    textAreaIcon: {
+        marginTop: 12,
+    },
+    input: {
+        flex: 1,
+        paddingVertical: 14,
+        paddingHorizontal: 8,
+        fontSize: 16,
+        color: '#333',
+    },
+    textArea: {
+        height: 80,
+        textAlignVertical: 'top',
+        paddingTop: 14,
+    },
+    imagePreviewContainer: {
+        position: 'relative',
+        width: '100%',
+        height: 200,
+        borderRadius: 12,
+        overflow: 'hidden',
+        backgroundColor: '#f0f0f0',
+        marginTop: 4,
     },
     previewImage: {
-        width: 120,
-        height: 80,
-        borderRadius: 6,
-        marginBottom: 6,
-        backgroundColor: '#f0f0f0',
+        width: '100%',
+        height: '100%',
+    },
+    removeImageButton: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: 20,
+        padding: 4,
+    },
+    imagePickerButton: {
+        width: '100%',
+        height: 150,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: '#e0e0e0',
+        borderStyle: 'dashed',
+        backgroundColor: '#fafafa',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 4,
+        gap: 8,
+    },
+    imagePickerText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#007AFF',
+        marginTop: 4,
+    },
+    switchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 12,
+        paddingHorizontal: 4,
+        borderRadius: 12,
+        backgroundColor: '#fafafa',
+        marginTop: 4,
+    },
+    switchLabelContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    switchLabel: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+    },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff5f5',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ffebee',
+        gap: 8,
+        marginTop: 4,
+    },
+    errorText: {
+        color: '#ff4444',
+        fontSize: 14,
+        fontWeight: '500',
+        flex: 1,
+    },
+    modalActions: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingTop: 16,
+        paddingBottom: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
+        gap: 12,
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        gap: 8,
+        minHeight: 52,
+    },
+    buttonDisabled: {
+        opacity: 0.6,
+    },
+    cancelButton: {
+        backgroundColor: '#f5f5f5',
+    },
+    cancelButtonText: {
+        color: '#333',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    saveButton: {
+        backgroundColor: '#007AFF',
+        shadowColor: '#007AFF',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    buttonIcon: {
+        marginRight: -4,
+    },
+    saveButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
 })

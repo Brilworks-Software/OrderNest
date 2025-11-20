@@ -30,8 +30,8 @@ export default function StatusMenuModal({ visible, onClose, anchor, options, onS
           {(() => {
             const windowWidth = Platform.OS === 'web' ? (window as any).innerWidth : Dimensions.get('window').width;
             const windowHeight = Platform.OS === 'web' ? (window as any).innerHeight : Dimensions.get('window').height;
-            const modalWidth = Math.min(maxWidth, 240);
-            const modalEstHeight = options.length * 52 + 8 + 12;
+            const modalWidth = Math.min(maxWidth, 280);
+            const modalEstHeight = options.length * 56 + 8 + 64;
             let left = anchor ? anchor.x : (windowWidth - modalWidth) / 2;
             let top = anchor ? anchor.y + anchor.height + 8 : (windowHeight - modalEstHeight) / 2;
 
@@ -55,16 +55,30 @@ export default function StatusMenuModal({ visible, onClose, anchor, options, onS
                       top,
                       width: modalWidth,
                     } as any,
-                    Platform.OS === 'web' ? ({ boxShadow: '0 6px 18px rgba(0,0,0,0.12)' } as any) : {},
+                    Platform.OS === 'web' ? ({ boxShadow: '0 8px 24px rgba(0,0,0,0.15)' } as any) : {},
                   ]}
                 >
-                  {options.map((o) => (
-                    <TouchableOpacity key={o.key} onPress={() => onSelect(o.key)} style={styles.option}>
+                  {options.map((o, index) => (
+                    <TouchableOpacity
+                      key={o.key}
+                      onPress={() => onSelect(o.key)}
+                      style={[
+                        styles.option,
+                        index === options.length - 1 && styles.optionLast,
+                        o.label === "Available" ? styles.availableBG : o.label === "Reserved" ? styles.reservedBG : o.label === "Occupied" ? styles.occupiedBG : {backgroundColor: "#af52de"}
+                      ]}
+                      activeOpacity={0.7}
+                    >
                       <Text style={styles.optionText}>{o.label}</Text>
                     </TouchableOpacity>
                   ))}
-                  <TouchableOpacity onPress={onClose} style={[styles.option, styles.cancel]}>
-                    <Text style={styles.optionText}>Cancel</Text>
+                  <View style={styles.separator} />
+                  <TouchableOpacity
+                    onPress={onClose}
+                    style={[styles.option, styles.cancel]}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.cancelText}>Cancel</Text>
                   </TouchableOpacity>
                 </View>
               </TouchableWithoutFeedback>
@@ -79,31 +93,65 @@ export default function StatusMenuModal({ visible, onClose, anchor, options, onS
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   content: {
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 16,
     overflow: 'hidden',
-    elevation: 6,
+    elevation: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
   },
   option: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#fff',
+    borderBottomColor: '#f0f0f0',
+    minHeight: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+    maxHeight: 90,
+  },
+  availableBG:{
+    backgroundColor: "#0a84ff"
+  },
+  occupiedBG:{
+    backgroundColor: "#ff9f0a"
+  },
+  reservedBG: {
+    backgroundColor: "#af52de"
+  },
+  optionLast: {
+    borderBottomWidth: 0,
   },
   optionText: {
     fontSize: 16,
-    color: '#111',
+    color: '#1a1a1a',
+    fontWeight: '600',
     textAlign: 'center',
+    letterSpacing: -0.2,
+  },
+  separator: {
+    height: 8,
+    backgroundColor: '#f8f9fa',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#f0f0f0',
   },
   cancel: {
     backgroundColor: '#fafafa',
+    borderBottomWidth: 0,
+  },
+  cancelText: {
+    fontSize: 16,
+    color: '#6b7280',
+    fontWeight: '600',
+    textAlign: 'center',
+    letterSpacing: -0.2,
   },
 });

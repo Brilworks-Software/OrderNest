@@ -1,14 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, TouchableOpacity, Alert, Platform } from 'react-native';
 import { useTables, useUpdateTableStatus, useDeleteTable, useCreateTable, useUpdateTable } from '../../firebase/hooks/useTable';
 import type { Table } from '../../firebase/types';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/firebase/hooks/useAuth';
 import { useUser } from '@/firebase/hooks/useUsers';
-import { SafeAreaView } from 'react-native-safe-area-context';
 // import { Table } from 'lucide-react-native';
 import TableModal from '@/components/TableModal';
+import { Container } from '@/components/Container';
 import StatusMenuModal from '@/components/StatusMenuModal';
+import { ArrowLeft, Trash2 } from 'lucide-react-native';
 
 export default function Tables() {
     const { currentUser, isLoadingUser } = useAuth();
@@ -22,14 +23,15 @@ export default function Tables() {
   const createTable = useCreateTable();
   const updateTable = useUpdateTable();
   const [isModalVisible, setModalVisible] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'available' | 'occupied' | 'reserved'>('all');
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <Container>
         <View style={styles.center}>
           <ActivityIndicator size="large" />
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
@@ -37,11 +39,11 @@ export default function Tables() {
     console.log(error);
     
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <Container>
         <View style={styles.center}>
           <Text style={styles.error}>Failed to load tables</Text>
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
@@ -154,7 +156,7 @@ export default function Tables() {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={onDelete} style={[styles.actionButtonSmall, styles.delete]}>
-            <Text style={styles.actionText}>🗑️</Text>
+            <Trash2 size={18} color={"#ff0000"} />
           </TouchableOpacity>
         </View>
 
@@ -214,13 +216,28 @@ export default function Tables() {
 
   const statusCounts = getStatusCounts();
 
+  // Filter tables based on selected status
+  const filteredTables = useMemo(() => {
+    if (!tables) return [];
+    if (statusFilter === 'all') return tables;
+    return tables.filter(t => t.status === statusFilter);
+  }, [tables, statusFilter]);
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container>
+      
       <View style={styles.container}>
         {/* <View style={styles.headerContainer}>
           <Text style={styles.header}>Tables</Text>
           <Text style={styles.subHeader}>{statusCounts.total} total</Text>
         </View> */}
+
+<View style={styles.headerContainer}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft />
+          </TouchableOpacity>
+          <Text style={styles.header}>Tables</Text>
+        </View>
 
         {/* Status Summary Cards */}
         <View style={styles.summaryContainer}>
@@ -238,15 +255,87 @@ export default function Tables() {
           </View>
         </View>
 
+        {/* Filter Tabs */}
+        <View style={styles.filterContainer}>
+          <TouchableOpacity
+            style={[
+              styles.filterTab,
+              statusFilter === 'all' && styles.filterTabActive
+            ]}
+            onPress={() => setStatusFilter('all')}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterTabText,
+              statusFilter === 'all' && styles.filterTabTextActive
+            ]}>
+              All
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.filterTab,
+              statusFilter === 'available' && styles.filterTabActive
+            ]}
+            onPress={() => setStatusFilter('available')}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterTabText,
+              statusFilter === 'available' && styles.filterTabTextActive
+            ]}>
+              Available
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.filterTab,
+              statusFilter === 'occupied' && styles.filterTabActive
+            ]}
+            onPress={() => setStatusFilter('occupied')}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterTabText,
+              statusFilter === 'occupied' && styles.filterTabTextActive
+            ]}>
+              Occupied
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.filterTab,
+              statusFilter === 'reserved' && styles.filterTabActive
+            ]}
+            onPress={() => setStatusFilter('reserved')}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.filterTabText,
+              statusFilter === 'reserved' && styles.filterTabTextActive
+            ]}>
+              Reserved
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <FlatList
-          data={tables ?? []}
+          data={filteredTables}
           keyExtractor={(t) => t.id}
           renderItem={({ item }) => <TableRow item={item} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyIcon}>🍽️</Text>
-              <Text style={styles.emptyTitle}>No tables found</Text>
-              <Text style={styles.emptyMessage}>Tables will appear here once they are added</Text>
+              <Text style={styles.emptyTitle}>
+                {statusFilter === 'all' 
+                  ? 'No tables found' 
+                  : `No ${statusFilter} tables`}
+              </Text>
+              <Text style={styles.emptyMessage}>
+                {statusFilter === 'all'
+                  ? 'Tables will appear here once they are added'
+                  : `There are no ${statusFilter} tables at the moment`}
+              </Text>
             </View>
           }
           contentContainerStyle={styles.listContent}
@@ -261,17 +350,13 @@ export default function Tables() {
         visible={isModalVisible}
         onClose={handleCloseModal}
         restaurantId={restaurantId}
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit as (table: any, mode: "create" | "edit") => void | Promise<void>}
       />
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
   container: {
     flex: 1,
     padding: 16,
@@ -283,9 +368,13 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 8,
   },
   header: {
-    fontSize: 32,
+    fontSize: 22,
     fontWeight: '800',
     color: '#1a1a1a',
     letterSpacing: -0.5,
@@ -313,26 +402,27 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   summaryCardAvailable: {
-    backgroundColor: '#e6f4ff',
+    backgroundColor: '#0a84ff',
   },
   summaryCardOccupied: {
-    backgroundColor: '#fff4e6',
+    backgroundColor: '#ff9f0a',
   },
   summaryCardReserved: {
-    backgroundColor: '#f3e8ff',
+    backgroundColor: '#af52de',
   },
   summaryNumber: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: '#fff',
     marginBottom: 4,
   },
   summaryLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#fff',
     fontWeight: '600',
-    textTransform: 'uppercase',
+    // textTransform: 'uppercase',
     letterSpacing: 0.5,
+    textAlign: "center"
   },
   listContent: {
     paddingBottom: 80,
@@ -401,7 +491,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionButtonSmall: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 6,
     paddingVertical: 8,
     borderRadius: 8,
     marginLeft: 8,
@@ -418,7 +508,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   delete: {
-    backgroundColor: '#ff3b30',
+    backgroundColor: '#ffffee',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -454,7 +544,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#0a84ff',
+    backgroundColor: '#104A9c',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 6,
@@ -468,5 +558,35 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 30,
     fontWeight: '600',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  filterTab: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  filterTabActive: {
+    backgroundColor: '#104A9c',
+  },
+  filterTabText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6b7280',
+  },
+  filterTabTextActive: {
+    color: '#fff',
   },
 });

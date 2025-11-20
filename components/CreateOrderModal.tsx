@@ -9,11 +9,13 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTables, useUpdateTableStatus } from '@/firebase/hooks/useTable'
 import { useMenuItems } from '@/firebase/hooks/useMenuItem'
 import { useRestaurant } from '@/firebase/hooks/useRestaurant'
 import { useCreateOrder, useUpdateOrder } from '@/firebase/hooks/useOrder'
 import type { OrderItem, MenuItem, Table, Order } from '@/firebase/types'
+import { Trash2 } from 'lucide-react-native'
 
 interface CreateOrderModalProps {
   visible: boolean
@@ -275,7 +277,7 @@ export default function CreateOrderModal({
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
+        <SafeAreaView style={styles.modalContainer} edges={['top', 'bottom']}>
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.modalTitle}>{isEditMode ? 'Edit Order' : 'Create Order'}</Text>
@@ -309,6 +311,7 @@ export default function CreateOrderModal({
                         styles.tableOption,
                         selectedTableId === table.id && styles.tableOptionActive,
                         isEditMode && styles.tableOptionDisabled,
+                        tables[tables.length - 1].id === table.id && {marginRight: 16}
                       ]}
                       onPress={() => {
                         if (!submitting && !isEditMode) {
@@ -508,9 +511,9 @@ export default function CreateOrderModal({
                               <Text style={styles.orderItemName} numberOfLines={1}>
                                 {item.menuItem?.name || 'Unknown Item'}
                               </Text>
-                              <View style={styles.deliveredBadge}>
+                              {/* <View style={styles.deliveredBadge}>
                                 <Text style={styles.deliveredBadgeText}>✓ Delivered</Text>
-                              </View>
+                              </View> */}
                             </View>
                             <Text style={styles.orderItemPrice}>
                               ₹{item.price.toFixed(2)} × {item.qty}
@@ -580,7 +583,7 @@ export default function CreateOrderModal({
                             onPress={() => handleRemoveItem(item.menu_item_id)}
                             disabled={submitting}
                           >
-                            <Text style={styles.removeButtonText}>🗑️</Text>
+                            <Trash2 size={20} color={"#ff0000"} />
                           </Pressable>
                         </View>
                       </View>
@@ -662,7 +665,7 @@ export default function CreateOrderModal({
               )}
             </Pressable>
           </View>
-        </View>
+        </SafeAreaView>
       </View>
     </Modal>
   )
@@ -681,7 +684,7 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     maxHeight: '90%',
     backgroundColor: '#fff',
-    borderRadius: 20,
+    borderRadius: 12,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
@@ -701,7 +704,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: '#333',
     letterSpacing: -0.5,
   },
   closeButton: {
@@ -718,7 +721,7 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   scrollView: {
-    maxHeight: '70%',
+    // maxHeight: '70%',
   },
   section: {
     paddingHorizontal: 20,
@@ -728,7 +731,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 16,
-    color: '#1a1a1a',
+    color: '#333',
     letterSpacing: -0.3,
   },
   loader: {
@@ -745,7 +748,7 @@ const styles = StyleSheet.create({
   tableOption: {
     width: 70,
     height: 70,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 2.5,
     borderColor: '#e0e0e0',
     alignItems: 'center',
@@ -756,12 +759,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
   },
   tableOptionActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-    shadowColor: '#007AFF',
+    backgroundColor: '#10b981',
+    borderColor: '#10b981',
+    shadowColor: '#10b981',
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
@@ -788,7 +791,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#34c759',
+    backgroundColor: '#10b981',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -814,7 +817,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#007AFF',
+    color: '#10b981',
     marginBottom: 12,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -828,11 +831,11 @@ const styles = StyleSheet.create({
     padding: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: '#e0e0e0',
   },
   menuItemImage: {
     width: 70,
@@ -860,7 +863,7 @@ const styles = StyleSheet.create({
   menuItemName: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     flex: 1,
   },
   menuItemNameRow: {
@@ -871,7 +874,7 @@ const styles = StyleSheet.create({
   },
   menuItemDescription: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#666',
     marginBottom: 8,
     lineHeight: 18,
   },
@@ -882,11 +885,11 @@ const styles = StyleSheet.create({
   },
   menuItemPrice: {
     fontSize: 16,
-    color: '#007AFF',
+    color: '#10b981',
     fontWeight: '700',
   },
   itemQtyBadge: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#10b981',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
@@ -900,10 +903,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#10b981',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#007AFF',
+    shadowColor: '#10b981',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -924,10 +927,10 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#10b981',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#007AFF',
+    shadowColor: '#10b981',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
@@ -951,7 +954,7 @@ const styles = StyleSheet.create({
   menuItemQuantityText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
   },
   orderHeader: {
     flexDirection: 'row',
@@ -960,7 +963,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   orderCountBadge: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#10b981',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -982,11 +985,11 @@ const styles = StyleSheet.create({
     padding: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: '#e0e0e0',
   },
   orderItemImage: {
     width: 60,
@@ -1014,12 +1017,12 @@ const styles = StyleSheet.create({
   orderItemName: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     marginBottom: 4,
   },
   orderItemPrice: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#666',
   },
   orderItemRight: {
     alignItems: 'flex-end',
@@ -1028,7 +1031,7 @@ const styles = StyleSheet.create({
   orderItemTotal: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
   },
   quantityControls: {
     flexDirection: 'row',
@@ -1039,10 +1042,10 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#10b981',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#007AFF',
+    shadowColor: '#10b981',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
@@ -1066,16 +1069,16 @@ const styles = StyleSheet.create({
   quantityText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
   },
   removeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#ff3b30',
+    backgroundColor: '#ffffee',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#ff3b30',
+    shadowColor: '#ff4444',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
@@ -1103,12 +1106,12 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 15,
-    color: '#6b7280',
+    color: '#666',
     fontWeight: '600',
   },
   totalValue: {
     fontSize: 15,
-    color: '#1a1a1a',
+    color: '#333',
     fontWeight: '700',
   },
   finalTotalRow: {
@@ -1121,13 +1124,13 @@ const styles = StyleSheet.create({
   },
   finalTotalLabel: {
     fontSize: 20,
-    color: '#1a1a1a',
+    color: '#333',
     fontWeight: '800',
     letterSpacing: -0.5,
   },
   finalTotalValue: {
     fontSize: 20,
-    color: '#007AFF',
+    color: '#10b981',
     fontWeight: '800',
     letterSpacing: -0.5,
   },
@@ -1142,21 +1145,21 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
-    color: '#6b7280',
+    color: '#666',
     fontWeight: '500',
     textAlign: 'center',
   },
   errorContainer: {
     backgroundColor: '#fff5f5',
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#fecaca',
     marginTop: 16,
     marginBottom: 8,
   },
   error: {
-    color: '#dc2626',
+    color: '#ff4444',
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
@@ -1189,13 +1192,13 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
   },
   cancelButtonText: {
-    color: '#1a1a1a',
+    color: '#333',
     fontSize: 16,
     fontWeight: '700',
   },
   createButton: {
-    backgroundColor: '#007AFF',
-    shadowColor: '#007AFF',
+    backgroundColor: '#10b981',
+    shadowColor: '#10b981',
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 4,
@@ -1227,7 +1230,7 @@ const styles = StyleSheet.create({
   deliveredSectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#34c759',
+    color: '#10b981',
     marginBottom: 12,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -1246,7 +1249,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   deliveredBadge: {
-    backgroundColor: '#34c759',
+    backgroundColor: '#10b981',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
@@ -1258,13 +1261,13 @@ const styles = StyleSheet.create({
   },
   deliveredLabel: {
     fontSize: 11,
-    color: '#6b7280',
+    color: '#666',
     fontWeight: '600',
     fontStyle: 'italic',
     marginTop: 4,
   },
   reorderBadge: {
-    backgroundColor: '#ff9f0a',
+    backgroundColor: '#10b981',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
@@ -1291,7 +1294,7 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
   },
   unavailableBadge: {
-    backgroundColor: '#ef4444',
+    backgroundColor: '#10b981',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,

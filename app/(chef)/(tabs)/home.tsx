@@ -5,8 +5,8 @@ import { useTables } from '@/firebase/hooks/useTable';
 import type { Order } from '@/firebase/types';
 import { useAuth } from '@/firebase/hooks/useAuth';
 import { useUser } from '@/firebase/hooks/useUsers';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import OrderDetailsModal from '@/components/OrderDetailsModal';
+import { Container } from '@/components/Container';
+import OrderDetailsChaffModal from '@/components/OrderDetailsChaffModal';
 
 export default function home() {
   const { currentUser } = useAuth();
@@ -34,9 +34,34 @@ export default function home() {
   }, [orders]);
 
   // Get table number from table_id
+  const tableNumberMap = useMemo(() => {
+    if (!tables) return {};
+    const map: Record<string, number> = {};
+    tables.forEach(t => {
+      if (t.id && typeof t.table_number !== 'undefined') {
+        map[t.id] = t.table_number;
+      }
+    });
+    return map;
+  }, [tables]);
+
   const getTableNumber = (tableId: string) => {
-    const table = tables?.find(t => t.id === tableId);
-    return table?.table_number ?? tableId;
+    return tableNumberMap[tableId] ?? tableId;
+  };
+
+  const tableNameMap = useMemo(() => {
+    if (!tables) return {};
+    const map: Record<string, string> = {};
+    tables.forEach(t => {
+      if (t.id && typeof t.table_number !== 'undefined') {
+        map[t.id] = (t.table_name ? t.table_name : `Table ${t.table_number}`);
+      }
+    });
+    return map;
+  }, [tables]);
+
+  const getTableName = (tableId: string) => {
+    return tableNameMap[tableId] ?? tableId;
   };
 
   // Format time
@@ -62,13 +87,13 @@ export default function home() {
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'pending':
-        return '#ff9f0a';
+        return '#ff6b35';
       case 'preparing':
         return '#0a84ff';
       case 'served':
         return '#34c759';
       case 'paid':
-        return '#8e8e93';
+        return '#999';
       default:
         return '#666';
     }
@@ -77,6 +102,7 @@ export default function home() {
   const OrderCard = ({ item }: { item: Order }) => {
     const statusColor = getStatusColor(item.status);
     const tableNumber = getTableNumber(item.table_id);
+    const tableName = getTableName(item.table_id);
     const timeAgo = formatTime((item as any).createdAt);
     const itemCount = item.order_items?.reduce((sum, item) => sum + item.qty, 0) || 0;
     
@@ -102,7 +128,7 @@ export default function home() {
               </Text>
             </View>
             <View style={styles.orderInfo}>
-              <Text style={styles.orderTitle}>Table {tableNumber}</Text>
+              <Text style={styles.orderTitle}>{tableName}</Text>
               <Text style={styles.orderTime}>{timeAgo}</Text>
             </View>
           </View>
@@ -137,16 +163,16 @@ export default function home() {
 
   if (isLoadingOrders) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <Container>
         <View style={styles.center}>
           <ActivityIndicator size="large" />
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Container>
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Text style={styles.header}>Active Orders</Text>
@@ -172,7 +198,7 @@ export default function home() {
           showsVerticalScrollIndicator={false}
         />
 
-        <OrderDetailsModal
+        <OrderDetailsChaffModal
           visible={modalVisible}
           onClose={() => {
             setModalVisible(false);
@@ -182,15 +208,11 @@ export default function home() {
           restaurantId={restaurantId}
         />
       </View>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
   container: {
     flex: 1,
     padding: 16,
@@ -202,16 +224,17 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     marginBottom: 20,
+    paddingHorizontal: 4,
   },
   header: {
-    fontSize: 32,
+    fontSize: 22,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: '#333',
     letterSpacing: -0.5,
   },
   subHeader: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     marginTop: 4,
     fontWeight: '500',
   },
@@ -220,15 +243,15 @@ const styles = StyleSheet.create({
   },
   orderCard: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderLeftWidth: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   orderHeader: {
     flexDirection: 'row',
@@ -261,12 +284,12 @@ const styles = StyleSheet.create({
   orderTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     marginBottom: 4,
   },
   orderTime: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#666',
     fontWeight: '500',
   },
   statusBadge: {
@@ -281,7 +304,7 @@ const styles = StyleSheet.create({
   },
   orderDetails: {
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: '#e0e0e0',
     paddingTop: 12,
   },
   orderDetailRow: {
@@ -292,16 +315,16 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     fontWeight: '500',
   },
   detailValue: {
     fontSize: 16,
-    color: '#1a1a1a',
+    color: '#333',
     fontWeight: '700',
   },
   pendingItems: {
-    color: '#ff9f0a',
+    color: '#ff6b35',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -316,12 +339,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#333',
     marginBottom: 8,
   },
   emptyMessage: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666',
     textAlign: 'center',
     lineHeight: 20,
   },
