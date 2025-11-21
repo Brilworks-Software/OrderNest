@@ -228,17 +228,17 @@ export default function AddMenuItemModal({
                                     <Text style={localStyles.label}>Name</Text>
                                     <View style={[
                                         localStyles.inputContainer,
-                                        focusedInput === 'name' && localStyles.inputContainerFocused,
-                                        errorMessage && focusedInput === 'name' && localStyles.inputContainerError
+                                        focusedInput === 'name' && {borderColor: "#104A9c"},
+                                        errorMessage && localStyles.inputContainerError
                                     ]}>
                                         <Ionicons 
                                             name="restaurant-outline" 
                                             size={20} 
-                                            color={focusedInput === 'name' ? '#007AFF' : '#104A9c'} 
+                                            color={focusedInput === 'name' ? '#104A9c' : '#999'} 
                                             style={localStyles.inputIcon}
                                         />
                                         <TextInput
-                                            style={localStyles.input}
+                                            style={[localStyles.input, {outline: "none"}]}
                                             value={name}
                                             onChangeText={(t) => {
                                                 setName(t)
@@ -247,6 +247,8 @@ export default function AddMenuItemModal({
                                             placeholder="Item name"
                                             placeholderTextColor="#999"
                                             editable={!isLoading}
+                                            onFocus={() => setFocusedInput("name")}
+                                            onBlur={() => setFocusedInput(null)}
                                         />
                                     </View>
                                 </View>
@@ -256,17 +258,17 @@ export default function AddMenuItemModal({
                                     <Text style={localStyles.label}>Category</Text>
                                     <View style={[
                                         localStyles.inputContainer,
-                                        focusedInput === 'category' && localStyles.inputContainerFocused,
-                                        errorMessage && focusedInput === 'category' && localStyles.inputContainerError
+                                        focusedInput === 'category' && {borderColor: "#104A9c"},
+                                        errorMessage &&  localStyles.inputContainerError
                                     ]}>
                                         <Ionicons 
                                             name="grid-outline" 
                                             size={20} 
-                                            color={focusedInput === 'category' ? '#007AFF' : '#104A9c'} 
+                                            color={focusedInput === 'category' ? '#104A9c' : '#999'} 
                                             style={localStyles.inputIcon}
                                         />
                                         <TextInput
-                                            style={localStyles.input}
+                                            style={[localStyles.input, {outline: "none"}]}
                                             value={category}
                                             onChangeText={(t) => {
                                                 setCategory(t)
@@ -275,6 +277,8 @@ export default function AddMenuItemModal({
                                             placeholder="e.g. Drinks, Ice-creams"
                                             placeholderTextColor="#999"
                                             editable={!isLoading}
+                                            onFocus={() => setFocusedInput("category")}
+                                            onBlur={() => setFocusedInput(null)}
                                         />
                                     </View>
                                 </View>
@@ -285,17 +289,17 @@ export default function AddMenuItemModal({
                                     <View style={[
                                         localStyles.inputContainer,
                                         localStyles.textAreaContainer,
-                                        focusedInput === 'description' && localStyles.inputContainerFocused,
-                                        errorMessage && focusedInput === 'description' && localStyles.inputContainerError
+                                        focusedInput === 'description' && {borderColor: "#104A9c"},
+                                        errorMessage &&  localStyles.inputContainerError
                                     ]}>
                                         <Ionicons 
                                             name="document-text-outline" 
                                             size={20} 
-                                            color={focusedInput === 'description' ? '#007AFF' : '#104A9c'} 
+                                            color={focusedInput === 'description' ? '#104A9c' : '#999'} 
                                             style={[localStyles.inputIcon, localStyles.textAreaIcon]}
                                         />
                                         <TextInput
-                                            style={[localStyles.input, localStyles.textArea]}
+                                            style={[localStyles.input, localStyles.textArea, {outline: "none"}]}
                                             value={description}
                                             onChangeText={(t) => {
                                                 setDescription(t)
@@ -306,6 +310,8 @@ export default function AddMenuItemModal({
                                             multiline
                                             numberOfLines={4}
                                             editable={!isLoading}
+                                            onFocus={() => setFocusedInput("description")}
+                                            onBlur={() => setFocusedInput(null)}
                                         />
                                     </View>
                                 </View>
@@ -315,17 +321,17 @@ export default function AddMenuItemModal({
                                     <Text style={localStyles.label}>Price</Text>
                                     <View style={[
                                         localStyles.inputContainer,
-                                        focusedInput === 'price' && localStyles.inputContainerFocused,
-                                        errorMessage && focusedInput === 'price' && localStyles.inputContainerError
+                                        focusedInput === 'price' && {borderColor: "#104A9c"},
+                                        errorMessage &&  localStyles.inputContainerError
                                     ]}>
                                         <Ionicons 
                                             name="cash-outline" 
                                             size={20} 
-                                            color={focusedInput === 'price' ? '#007AFF' : '#104A9c'} 
+                                            color={focusedInput === 'price' ? '#104A9c' : '#999'} 
                                             style={localStyles.inputIcon}
                                         />
                                         <TextInput
-                                            style={localStyles.input}
+                                            style={[localStyles.input, {outline: "none"}]}
                                             value={price}
                                             onChangeText={(t) => {
                                                 setPrice(t.replace(/[^0-9.]/g, ''))
@@ -335,6 +341,8 @@ export default function AddMenuItemModal({
                                             placeholder="0.00"
                                             placeholderTextColor="#999"
                                             editable={!isLoading}
+                                            onFocus={() => setFocusedInput("price")}
+                                            onBlur={() => setFocusedInput(null)}
                                         />
                                     </View>
                                 </View>
@@ -366,7 +374,7 @@ export default function AddMenuItemModal({
                                             onPress={pickImage}
                                             disabled={isLoading}
                                         >
-                                            <Ionicons name="image-outline" size={32} color="#007AFF" />
+                                            <Ionicons name="image-outline" size={32} color="#104A9c" />
                                             <Text style={localStyles.imagePickerText}>Select Image</Text>
                                         </TouchableOpacity>
                                     )}
@@ -600,7 +608,7 @@ const localStyles = StyleSheet.create({
         height: 150,
         borderRadius: 12,
         borderWidth: 2,
-        borderColor: '#e0e0e0',
+        borderColor: '#104A9c',
         borderStyle: 'dashed',
         backgroundColor: '#fafafa',
         alignItems: 'center',
@@ -611,7 +619,7 @@ const localStyles = StyleSheet.create({
     imagePickerText: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#007AFF',
+        color: '#104A9c',
         marginTop: 4,
     },
     switchContainer: {

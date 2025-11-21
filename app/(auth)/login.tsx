@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
 
   // show/hide password state
   const [showPassword, setShowPassword] = useState(false);
@@ -30,8 +31,6 @@ export default function LoginPage() {
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   
   // Refs for input fields
-  const emailInputRef = useRef<TextInput>(null);
-  const passwordInputRef = useRef<TextInput>(null);
   
   // Blur timeout ref to prevent immediate blur
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -94,7 +93,7 @@ export default function LoginPage() {
             <View 
               style={[
                 styles.inputContainer,
-                focusedInput === 'email' && styles.inputContainerFocused
+                focusedInput === 'email' && {borderColor: "#3b82f6"}
               ]}
               pointerEvents="box-none"
             >
@@ -105,7 +104,6 @@ export default function LoginPage() {
                 style={styles.icon} 
               />
               <TextInput
-                ref={emailInputRef}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -115,16 +113,17 @@ export default function LoginPage() {
                 style={[styles.input, {outline:'none'}]}
                 editable={!loading}
                 returnKeyType="next"
-                onSubmitEditing={() => passwordInputRef.current?.focus()}
                 accessibilityLabel="Email input"
                 numberOfLines={1}
+                onFocus={() => setFocusedInput("email")}
+                onBlur={() => setFocusedInput(null)}
               />
             </View>
 
             <View 
               style={[
                 styles.inputContainer,
-                focusedInput === 'password' && styles.inputContainerFocused
+                focusedInput === 'password' && {borderColor: "#3b82f6"}
               ]}
               pointerEvents="box-none"
             >
@@ -135,7 +134,6 @@ export default function LoginPage() {
                 style={styles.icon} 
               />
               <TextInput
-                ref={passwordInputRef}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -147,12 +145,13 @@ export default function LoginPage() {
                 onSubmitEditing={handlePress}
                 accessibilityLabel="Password input"
                 numberOfLines={1}
+                onFocus={() => setFocusedInput("password")}
+                onBlur={() => setFocusedInput(null)}
               />
               <TouchableOpacity
                 onPress={() => {
                   setShowPassword((s) => !s);
                   // Refocus the input after toggling password visibility
-                  setTimeout(() => passwordInputRef.current?.focus(), 100);
                 }}
                 style={styles.rightIcon}
                 accessibilityRole="button"
@@ -304,7 +303,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 52,
+    height: 45,
     paddingHorizontal: 12,
     fontSize: 16,
     color: '#111827',

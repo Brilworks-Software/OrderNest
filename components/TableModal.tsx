@@ -140,17 +140,17 @@ const TableModal: React.FC<TableModalProps> = ({
                 <Text style={styles.label}>Table Number</Text>
                 <View style={[
                   styles.inputContainer,
-                  focusedInput === 'tableNumber' && styles.inputContainerFocused,
+                  focusedInput === 'tableNumber' && {borderColor: "#104A9c"},
                   errorMessage && styles.inputContainerError
                 ]}>
                   <Ionicons 
                     name="grid-outline" 
                     size={20} 
-                    color={focusedInput === 'tableNumber' ? '#007AFF' : '#104A9c'} 
+                    color={focusedInput === 'tableNumber' ? '#104A9c' : '#999'} 
                     style={styles.inputIcon}
                   />
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, {outline: "none"}]}
                     value={tableNumber}
                     onChangeText={(t) => {
                       setTableNumber(t);
@@ -160,6 +160,8 @@ const TableModal: React.FC<TableModalProps> = ({
                     placeholder="Enter table number"
                     placeholderTextColor="#999"
                     editable={!loading}
+                    onFocus={() => setFocusedInput("tableNumber")}
+                    onBlur={() => setFocusedInput(null)}
                   />
                 </View>
               </View>
@@ -168,16 +170,16 @@ const TableModal: React.FC<TableModalProps> = ({
                 <Text style={styles.label}>Table Name</Text>
                 <View style={[
                   styles.inputContainer,
-                  focusedInput === 'tableName' && styles.inputContainerFocused
+                  focusedInput === 'tableName' && {borderColor: "#104A9c"}
                 ]}>
                   <Ionicons 
                     name="text-outline" 
                     size={20} 
-                    color={focusedInput === 'tableName' ? '#007AFF' : '#104A9c'} 
+                    color={focusedInput === 'tableName' ? '#104A9c' : '#999'} 
                     style={styles.inputIcon}
                   />
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, {outline: "none"}]}
                     value={tableName}
                     onChangeText={(t) => {
                       setTableName(t);
@@ -186,6 +188,8 @@ const TableModal: React.FC<TableModalProps> = ({
                     placeholder="Enter table name (optional)"
                     placeholderTextColor="#999"
                     editable={!loading}
+                    onFocus={() => setFocusedInput("tableName")}
+                    onBlur={() => setFocusedInput(null)}
                   />
                 </View>
               </View>

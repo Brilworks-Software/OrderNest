@@ -211,14 +211,14 @@ export default function Onboarding() {
               <View 
                 style={[
                   styles.inputContainer,
-                  focusedInput === 'name' && styles.inputContainerFocused
+                  focusedInput === 'name' && {borderColor: "#104A9c"}
                 ]}
                 pointerEvents="box-none"
               >
                 <Ionicons 
                   name="restaurant" 
                   size={20} 
-                  color={focusedInput === 'name' ? '#3b82f6' : '#104A9c'} 
+                  color={focusedInput === 'name' ? '#104A9c' : '#999'} 
                   style={styles.icon} 
                 />
                 <TextInput
@@ -229,6 +229,8 @@ export default function Onboarding() {
                   placeholderTextColor="#9ca3af"
                   editable={!loading}
                   returnKeyType="next"
+                  onFocus={() => setFocusedInput("name")}
+                  onBlur={() => setFocusedInput(null)}
                 />
               </View>
             </View>
@@ -238,14 +240,14 @@ export default function Onboarding() {
               <View 
                 style={[
                   styles.inputContainer,
-                  focusedInput === 'address' && styles.inputContainerFocused
+                  focusedInput === 'address' && {borderColor: "#104A9c"}
                 ]}
                 pointerEvents="box-none"
               >
                 <Ionicons 
                   name="location" 
                   size={20} 
-                  color={focusedInput === 'address' ? '#3b82f6' : '#104A9c'} 
+                  color={focusedInput === 'address' ? '#104A9c' : '#999'} 
                   style={styles.icon} 
                 />
                 <TextInput
@@ -259,6 +261,8 @@ export default function Onboarding() {
                   textAlignVertical="top"
                   editable={!loading}
                   returnKeyType="next"
+                  onFocus={() => setFocusedInput("address")}
+                  onBlur={() => setFocusedInput(null)}
                 />
               </View>
             </View>
@@ -268,14 +272,14 @@ export default function Onboarding() {
               <View 
                 style={[
                   styles.inputContainer,
-                  focusedInput === 'gstNumber' && styles.inputContainerFocused
+                  focusedInput === 'gstNumber' && {borderColor: "#104A9c"}
                 ]}
                 pointerEvents="box-none"
               >
                 <Ionicons 
                   name="document-text" 
                   size={20} 
-                  color={focusedInput === 'gstNumber' ? '#3b82f6' : '#104A9c'} 
+                  color={focusedInput === 'gstNumber' ? '#104A9c' : '#999'} 
                   style={styles.icon} 
                 />
                 <TextInput
@@ -286,6 +290,8 @@ export default function Onboarding() {
                   placeholderTextColor="#9ca3af"
                   editable={!loading}
                   returnKeyType="next"
+                  onFocus={() => setFocusedInput("gstNumber")}
+                  onBlur={() => setFocusedInput(null)}
                 />
               </View>
             </View>
@@ -296,14 +302,14 @@ export default function Onboarding() {
                 <View 
                   style={[
                     styles.inputContainer,
-                    focusedInput === 'gstPercentage' && styles.inputContainerFocused
+                    focusedInput === 'gstPercentage' && {borderColor: "#104A9c"}
                   ]}
                   pointerEvents="box-none"
                 >
                   <Ionicons 
                     name="calculator" 
                     size={20} 
-                    color={focusedInput === 'gstPercentage' ? '#3b82f6' : '#104A9c'} 
+                    color={focusedInput === 'gstPercentage' ? '#104A9c' : '#999'} 
                     style={styles.icon} 
                   />
                   <TextInput
@@ -315,6 +321,8 @@ export default function Onboarding() {
                     keyboardType="numeric"
                     editable={!loading}
                     returnKeyType="next"
+                    onFocus={() => setFocusedInput("gstPercentage")}
+                  onBlur={() => setFocusedInput(null)}
                   />
                 </View>
               </View>
@@ -324,14 +332,14 @@ export default function Onboarding() {
                 <View 
                   style={[
                     styles.inputContainer,
-                    focusedInput === 'serviceCharge' && styles.inputContainerFocused
+                    focusedInput === 'serviceCharge' && {borderColor: "#104A9c"}
                   ]}
                   pointerEvents="box-none"
                 >
                   <Ionicons 
                     name="card" 
                     size={20} 
-                    color={focusedInput === 'serviceCharge' ? '#3b82f6' : '#104A9c'} 
+                    color={focusedInput === 'serviceCharge' ? '#104A9c' : '#999'} 
                     style={styles.icon} 
                   />
                   <TextInput
@@ -343,6 +351,8 @@ export default function Onboarding() {
                     keyboardType="numeric"
                     editable={!loading}
                     returnKeyType="done"
+                    onFocus={() => setFocusedInput("serviceCharge")}
+                  onBlur={() => setFocusedInput(null)}
                   />
                 </View>
               </View>

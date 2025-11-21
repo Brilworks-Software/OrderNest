@@ -133,17 +133,17 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                 <Text style={styles.label}>Current Password</Text>
                                 <View style={[
                                     styles.passwordInputContainer,
-                                    focusedInput === 'current' && styles.passwordInputContainerFocused,
+                                    focusedInput === 'current' && { borderColor: theme},
                                     passwordError && styles.passwordInputContainerError
                                 ]}>
                                     <Ionicons 
                                         name="lock-closed-outline" 
                                         size={20} 
-                                        color={theme} 
+                                        color={focusedInput === 'current' ? theme : "#999"} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
-                                        style={styles.passwordInput}
+                                        style={[styles.passwordInput, {outline: "none"}]}
                                         placeholder="Enter current password"
                                         placeholderTextColor="#999"
                                         value={currentPassword}
@@ -151,7 +151,9 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         secureTextEntry={!showCurrentPassword}
                                         autoCapitalize="none"
                                         editable={!isUpdatingPassword && !isReauthenticating}
+                                        onFocus={() => setFocusedInput("current")}
                                         onBlur={() => setFocusedInput(null)}
+                                        numberOfLines={1}
                                     />
                                     <TouchableOpacity
                                         style={styles.eyeButton}
@@ -161,7 +163,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         <Ionicons 
                                             name={showCurrentPassword ? 'eye' : 'eye-off'} 
                                             size={22} 
-                                            color={theme} 
+                                            color={focusedInput === 'current' ? theme : "#999"} 
                                         />
                                     </TouchableOpacity>
                                 </View>
@@ -172,17 +174,17 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                 <Text style={styles.label}>New Password</Text>
                                 <View style={[
                                     styles.passwordInputContainer,
-                                    focusedInput === 'new' && styles.passwordInputContainerFocused,
+                                    focusedInput === 'new' && { borderColor: theme},
                                     passwordError && styles.passwordInputContainerError
                                 ]}>
                                     <Ionicons 
                                         name="lock-closed-outline" 
                                         size={20} 
-                                        color={theme} 
+                                        color={focusedInput === 'new' ? theme : "#999"} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
-                                        style={styles.passwordInput}
+                                        style={[styles.passwordInput, {outline: "none"}]}
                                         placeholder="Enter new password (min 6 characters)"
                                         placeholderTextColor="#999"
                                         value={newPassword}
@@ -190,7 +192,9 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         secureTextEntry={!showNewPassword}
                                         autoCapitalize="none"
                                         editable={!isUpdatingPassword && !isReauthenticating}
+                                        onFocus={() => setFocusedInput("new")}
                                         onBlur={() => setFocusedInput(null)}
+                                        numberOfLines={1}
                                     />
                                     <TouchableOpacity
                                         style={styles.eyeButton}
@@ -200,7 +204,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         <Ionicons 
                                             name={showNewPassword ? 'eye' : 'eye-off'} 
                                             size={22} 
-                                            color={theme} 
+                                            color={focusedInput === 'new' ? theme : "#999"} 
                                         />
                                     </TouchableOpacity>
                                 </View>
@@ -231,17 +235,17 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                 <Text style={styles.label}>Confirm New Password</Text>
                                 <View style={[
                                     styles.passwordInputContainer,
-                                    focusedInput === 'confirm' && styles.passwordInputContainerFocused,
+                                    focusedInput === 'confirm' && { borderColor: theme},
                                     passwordError && styles.passwordInputContainerError
                                 ]}>
                                     <Ionicons 
                                         name="lock-closed-outline" 
                                         size={20} 
-                                        color={theme} 
+                                        color={focusedInput === 'confirm' ? theme : "#999"} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
-                                        style={styles.passwordInput}
+                                        style={[styles.passwordInput, {outline: "none"}]}
                                         placeholder="Confirm new password"
                                         placeholderTextColor="#999"
                                         value={confirmPassword}
@@ -249,7 +253,9 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         secureTextEntry={!showConfirmPassword}
                                         autoCapitalize="none"
                                         editable={!isUpdatingPassword && !isReauthenticating}
+                                        onFocus={() => setFocusedInput("confirm")}
                                         onBlur={() => setFocusedInput(null)}
+                                        numberOfLines={1}
                                     />
                                     <TouchableOpacity
                                         style={styles.eyeButton}
@@ -259,7 +265,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                         <Ionicons 
                                             name={showConfirmPassword ? 'eye' : 'eye-off'} 
                                             size={22} 
-                                            color={theme} 
+                                            color={focusedInput === 'confirm' ? theme : "#999"} 
                                         />
                                     </TouchableOpacity>
                                 </View>
@@ -428,6 +434,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
         outline:'none',
+        height:45
     },
     eyeButton: {
         padding: 12,

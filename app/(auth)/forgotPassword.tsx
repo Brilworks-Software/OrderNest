@@ -72,7 +72,7 @@ export default function ForgotPassword() {
               <View 
                 style={[
                   styles.inputContainer,
-                  focusedInput && styles.inputContainerFocused
+                  focusedInput && {borderColor: "#3b82f6"}
                 ]}
                 pointerEvents="box-none"
               >
@@ -99,6 +99,8 @@ export default function ForgotPassword() {
                   returnKeyType="send"
                   onSubmitEditing={handleResetPassword}
                   editable={!isResettingPassword}
+                  onFocus={() => setFocusedInput(true)}
+                  onBlur={() => setFocusedInput(false)}
                 />
               </View>
             </View>

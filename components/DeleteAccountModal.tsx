@@ -37,6 +37,8 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
+    const [passwordFocused, setPasswordFocused] = useState(false)
+    const [confirmFocused,setConfirmFocused] = useState(false)
 
     const handleDeleteAccount = async () => {
         setError(null);
@@ -120,7 +122,8 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                                     <Text style={styles.label}>Enter Your Password</Text>
                                     <View style={[
                                         styles.passwordInputContainer,
-                                        focusedInput === 'password' && styles.passwordInputContainerFocused,
+                                        // passwordFocused && styles.passwordInputContainerFocused,
+                                        passwordFocused && {borderColor: theme},
                                         error && styles.passwordInputContainerError
                                     ]}>
                                         <Ionicons 
@@ -138,6 +141,8 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                                             secureTextEntry={!showPassword}
                                             autoCapitalize="none"
                                             editable={!isDeletingAccount && !isReauthenticating}
+                                            onFocus={() => setPasswordFocused(true)}
+                                            onBlur={()=> setPasswordFocused(false)}
                                         />
                                         <TouchableOpacity
                                             style={styles.eyeButton}
@@ -158,7 +163,8 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                                     <Text style={styles.label}>Type "DELETE" to confirm</Text>
                                     <View style={[
                                         styles.confirmInputContainer,
-                                        focusedInput === 'confirm' && styles.confirmInputContainerFocused,
+                                        // confirmFocused && styles.confirmInputContainerFocused,
+                                        confirmFocused && {borderColor: theme},
                                         error && styles.confirmInputContainerError
                                     ]}>
                                         <TextInput
@@ -169,6 +175,8 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                                             onChangeText={setConfirmText}
                                             autoCapitalize="none"
                                             editable={!isDeletingAccount && !isReauthenticating}
+                                            onFocus={() => setConfirmFocused(true)}
+                                            onBlur={()=> setConfirmFocused(false)}
                                         />
                                     </View>
                                 </View>

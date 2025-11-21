@@ -104,7 +104,7 @@ export default function SignUp() {
             <View 
               style={[
                 styles.inputContainer,
-                focusedInput === 'email' && styles.inputContainerFocused
+                focusedInput === 'email' && {borderColor: '#3b82f6'}
               ]}
               pointerEvents="box-none"
             >
@@ -122,18 +122,20 @@ export default function SignUp() {
                 autoCapitalize="none"
                 placeholder="Enter your email"
                 placeholderTextColor="#9ca3af"
-                style={styles.input}
+                style={[styles.input, {outline: "none"}]}
                 editable={!isSigningUp}
                 returnKeyType="next"
                 onSubmitEditing={() => passwordInputRef.current?.focus()}
                 accessibilityLabel="Email input"
+                onFocus={() => setFocusedInput("email")}
+                onBlur={() => setFocusedInput(null)}
               />
             </View>
 
             <View 
               style={[
                 styles.inputContainer,
-                focusedInput === 'password' && styles.inputContainerFocused
+                focusedInput === 'password' && {borderColor: '#3b82f6'}
               ]}
               pointerEvents="box-none"
             >
@@ -150,11 +152,13 @@ export default function SignUp() {
                 secureTextEntry={!showPassword}
                 placeholder="Enter your password"
                 placeholderTextColor="#9ca3af"
-                style={styles.input}
+                style={[styles.input, {outline: "none"}]}
                 editable={!isSigningUp}
                 returnKeyType="next"
                 onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
                 accessibilityLabel="Password input"
+                onFocus={() => setFocusedInput("password")}
+                onBlur={() => setFocusedInput(null)}
               />
               <TouchableOpacity
                 onPress={() => {
@@ -177,7 +181,7 @@ export default function SignUp() {
             <View 
               style={[
                 styles.inputContainer,
-                focusedInput === 'confirmPassword' && styles.inputContainerFocused
+                focusedInput === 'confirmPassword' && {borderColor: '#3b82f6'}
               ]}
               pointerEvents="box-none"
             >
@@ -194,11 +198,13 @@ export default function SignUp() {
                 secureTextEntry={!showConfirmPassword}
                 placeholder="Confirm your password"
                 placeholderTextColor="#9ca3af"
-                style={styles.input}
+                style={[styles.input, {outline: "none"}]}
                 editable={!isSigningUp}
                 returnKeyType="done"
                 onSubmitEditing={handleSignUp}
                 accessibilityLabel="Confirm password input"
+                onFocus={() => setFocusedInput("confirmPassword")}
+                onBlur={() => setFocusedInput(null)}
               />
               <TouchableOpacity
                 onPress={() => {
@@ -347,7 +353,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 52,
+    height: 45,
     paddingHorizontal: 12,
     fontSize: 16,
     color: '#111827',

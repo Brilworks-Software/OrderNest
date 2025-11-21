@@ -141,22 +141,23 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                 <Text style={styles.label}>Restaurant Name</Text>
                                 <View style={[
                                     styles.inputContainer,
-                                    focusedInput === 'name' && styles.inputContainerFocused,
-                                    restaurantError && focusedInput === 'name' && styles.inputContainerError
+                                    focusedInput === 'name' && {borderColor: "#104A9c"},
+                                    restaurantError && styles.inputContainerError
                                 ]}>
                                     <Ionicons 
                                         name="restaurant-outline" 
                                         size={20} 
-                                        color={focusedInput === 'name' ? '#007AFF' : '#104A9c'} 
+                                        color={focusedInput === 'name' ? '#104A9c' : '#999'} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
-                                        style={styles.input}
+                                        style={[styles.input, {outline: "none"}]}
                                         placeholder="Enter restaurant name"
                                         placeholderTextColor="#999"
                                         value={restaurantName}
                                         onChangeText={setRestaurantName}
                                         editable={!updateRestaurantMutation.isPending}
+                                        onFocus={() => setFocusedInput("name")}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                 </View>
@@ -168,17 +169,17 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                 <View style={[
                                     styles.inputContainer,
                                     styles.textAreaContainer,
-                                    focusedInput === 'address' && styles.inputContainerFocused,
-                                    restaurantError && focusedInput === 'address' && styles.inputContainerError
+                                    focusedInput === 'address' && {borderColor: "#104A9c"},
+                                    restaurantError &&  styles.inputContainerError
                                 ]}>
                                     <Ionicons 
                                         name="location-outline" 
                                         size={20} 
-                                        color={focusedInput === 'address' ? '#007AFF' : '#104A9c'} 
+                                        color={focusedInput === 'address' ? '#104A9c' : '#999'} 
                                         style={[styles.inputIcon, styles.textAreaIcon]}
                                     />
                                     <TextInput
-                                        style={[styles.input, styles.textArea]}
+                                        style={[styles.input, styles.textArea, {outline: "none"}]}
                                         placeholder="Enter restaurant address"
                                         placeholderTextColor="#999"
                                         value={restaurantAddress}
@@ -186,6 +187,7 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                         multiline
                                         numberOfLines={3}
                                         editable={!updateRestaurantMutation.isPending}
+                                        onFocus={() => setFocusedInput("address")}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                 </View>
@@ -196,22 +198,23 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                 <Text style={styles.label}>GST Number <Text style={styles.optionalText}>(Optional)</Text></Text>
                                 <View style={[
                                     styles.inputContainer,
-                                    focusedInput === 'gstNumber' && styles.inputContainerFocused,
-                                    restaurantError && focusedInput === 'gstNumber' && styles.inputContainerError
+                                    focusedInput === 'gstNumber' && {borderColor: "#104A9c"},
+                                    restaurantError && styles.inputContainerError
                                 ]}>
                                     <Ionicons 
                                         name="document-text-outline" 
                                         size={20} 
-                                        color={focusedInput === 'gstNumber' ? '#007AFF' : '#104A9c'} 
+                                        color={focusedInput === 'gstNumber' ? '#104A9c' : '#999'} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
-                                        style={styles.input}
+                                        style={[styles.input, {outline: "none"}]}
                                         placeholder="Enter GST number"
                                         placeholderTextColor="#999"
                                         value={gstNumber}
                                         onChangeText={setGstNumber}
                                         editable={!updateRestaurantMutation.isPending}
+                                        onFocus={() => setFocusedInput("gstNumber")}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                 </View>
@@ -222,23 +225,24 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                 <Text style={styles.label}>GST Percentage (%)</Text>
                                 <View style={[
                                     styles.inputContainer,
-                                    focusedInput === 'gstPercentage' && styles.inputContainerFocused,
-                                    restaurantError && focusedInput === 'gstPercentage' && styles.inputContainerError
+                                    focusedInput === 'gstPercentage' && {borderColor: "#104A9c"},
+                                    restaurantError && styles.inputContainerError
                                 ]}>
                                     <Ionicons 
                                         name="calculator-outline" 
                                         size={20} 
-                                        color={focusedInput === 'gstPercentage' ? '#007AFF' : '#104A9c'} 
+                                        color={focusedInput === 'gstPercentage' ? '#104A9c' : '#999'} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
-                                        style={styles.input}
+                                        style={[styles.input, {outline: "none"}]}
                                         placeholder="Enter GST percentage (0-100)"
                                         placeholderTextColor="#999"
                                         value={gstPercentage}
                                         onChangeText={setGstPercentage}
                                         keyboardType="numeric"
                                         editable={!updateRestaurantMutation.isPending}
+                                        onFocus={() => setFocusedInput("gstPercentage")}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                 </View>
@@ -249,23 +253,24 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                                 <Text style={styles.label}>Service Charge (%)</Text>
                                 <View style={[
                                     styles.inputContainer,
-                                    focusedInput === 'serviceCharge' && styles.inputContainerFocused,
-                                    restaurantError && focusedInput === 'serviceCharge' && styles.inputContainerError
+                                    focusedInput === 'serviceCharge' && {borderColor: "#104A9c"},
+                                    restaurantError && styles.inputContainerError
                                 ]}>
                                     <Ionicons 
                                         name="card-outline" 
                                         size={20} 
-                                        color={focusedInput === 'serviceCharge' ? '#007AFF' : '#104A9c'} 
+                                        color={focusedInput === 'serviceCharge' ? '#104A9c' : '#999'} 
                                         style={styles.inputIcon}
                                     />
                                     <TextInput
-                                        style={styles.input}
+                                        style={[styles.input, {outline: "none"}]}
                                         placeholder="Enter service charge percentage (0-100)"
                                         placeholderTextColor="#999"
                                         value={serviceCharge}
                                         onChangeText={setServiceCharge}
                                         keyboardType="numeric"
                                         editable={!updateRestaurantMutation.isPending}
+                                        onFocus={() => setFocusedInput("serviceCharge")}
                                         onBlur={() => setFocusedInput(null)}
                                     />
                                 </View>
