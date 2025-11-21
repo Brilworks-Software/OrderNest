@@ -427,6 +427,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         fontSize: 16,
         color: '#333',
+        outline:'none',
     },
     eyeButton: {
         padding: 12,

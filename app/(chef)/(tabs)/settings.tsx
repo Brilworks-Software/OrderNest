@@ -6,16 +6,20 @@ import { useUser } from '@/firebase/hooks/useUsers';
 import { useRestaurant } from '@/firebase/hooks/useRestaurant';
 import { router } from 'expo-router';
 import ChangePasswordModal from '@/components/ChangePasswordModal';
+import DeleteAccountModal from '@/components/DeleteAccountModal';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function Settings() {
-    const { currentUser, isLoadingUser, signOut, isSigningOut, updatePassword, isUpdatingPassword, reauthenticate, isReauthenticating } = useAuth();
+    const { currentUser, isLoadingUser, signOut, isSigningOut, updatePassword, isUpdatingPassword, reauthenticate, isReauthenticating, deleteAccount, isDeletingAccount } = useAuth();
     const userData = useUser(currentUser?.uid || '').data;
     const restaurantId = userData?.restaurantId || '';
     const { data: restaurant, isLoading: isLoadingRestaurant } = useRestaurant(restaurantId);
 
     // Change Password Modal State
     const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+
+    // Delete Account Modal State
+    const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
 
     const handleLogout = async () => {
         if (Platform.OS === 'web') {
@@ -56,6 +60,21 @@ export default function Settings() {
         await reauthenticate(currentPassword);
         // Then update password
         await updatePassword(newPassword);
+    };
+
+    const handleDeleteAccount = async (password: string) => {
+        try {
+            // First reauthenticate with password
+            await reauthenticate(password);
+            // Then delete the account
+            await deleteAccount();
+            // Navigate to login after successful deletion
+            router.replace('/(auth)/login');
+        } catch (error: any) {
+            // If it's a requires-recent-login error, we already reauthenticated, so throw
+            // Otherwise, rethrow the error
+            throw error;
+        }
     };
 
     if (isLoadingUser || isLoadingRestaurant) {
@@ -172,6 +191,22 @@ export default function Settings() {
                         </View>
                         <MaterialIcons name="chevron-right" size={24} color="#999" />
                     </TouchableOpacity>
+
+                    {/* Delete Account Option */}
+                    <TouchableOpacity
+                        style={[styles.optionCard, styles.deleteAccountCard]}
+                        onPress={() => setDeleteAccountModalVisible(true)}
+                        activeOpacity={0.7}
+                    >
+                        <View style={[styles.optionIconContainer, styles.deleteAccountIconContainer]}>
+                            <MaterialIcons name="delete" size={24} color="#ff4444" />
+                        </View>
+                        <View style={styles.optionContent}>
+                            <Text style={[styles.optionTitle, styles.deleteAccountText]}>Delete Account</Text>
+                            <Text style={styles.optionDescription}>Permanently delete your account and all data</Text>
+                        </View>
+                        <MaterialIcons name="chevron-right" size={24} color="#999" />
+                    </TouchableOpacity>
                 </View>
 
                 {/* Logout Section */}
@@ -211,6 +246,16 @@ export default function Settings() {
                 isReauthenticating={isReauthenticating}
                 onClose={() => setPasswordModalVisible(false)}
                 onUpdatePassword={handleChangePassword}
+                theme='#ff6b35'
+            />
+
+            {/* Delete Account Modal */}
+            <DeleteAccountModal
+                visible={deleteAccountModalVisible}
+                isDeletingAccount={isDeletingAccount}
+                isReauthenticating={isReauthenticating}
+                onClose={() => setDeleteAccountModalVisible(false)}
+                onDeleteAccount={handleDeleteAccount}
                 theme='#ff6b35'
             />
         </Container>
@@ -378,6 +423,16 @@ const styles = StyleSheet.create({
     logoutCard: {
         borderLeftWidth: 4,
         borderLeftColor: '#ff4444',
+    },
+    deleteAccountCard: {
+        borderLeftWidth: 4,
+        borderLeftColor: '#ff4444',
+    },
+    deleteAccountIconContainer: {
+        backgroundColor: '#ffebee',
+    },
+    deleteAccountText: {
+        color: '#ff4444',
     },
     optionContent: {
         flex: 1,

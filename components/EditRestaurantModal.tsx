@@ -446,6 +446,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 6,
         fontSize: 15,
         color: '#333',
+        outline:'none',
     },
     textArea: {
         height: 70,

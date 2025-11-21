@@ -112,7 +112,7 @@ export default function LoginPage() {
                 autoCapitalize="none"
                 placeholder="Enter your email"
                 placeholderTextColor="#9ca3af"
-                style={styles.input}
+                style={[styles.input, {outline:'none'}]}
                 editable={!loading}
                 returnKeyType="next"
                 onSubmitEditing={() => passwordInputRef.current?.focus()}
@@ -141,7 +141,7 @@ export default function LoginPage() {
                 secureTextEntry={!showPassword}
                 placeholder="Enter your password"
                 placeholderTextColor="#9ca3af"
-                style={styles.input}
+                style={[styles.input, {outline:'none'}]}
                 editable={!loading}
                 returnKeyType="done"
                 onSubmitEditing={handlePress}

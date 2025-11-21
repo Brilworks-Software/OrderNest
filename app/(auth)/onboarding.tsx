@@ -222,7 +222,7 @@ export default function Onboarding() {
                   style={styles.icon} 
                 />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, {outline:'none'}]}
                   value={name}
                   onChangeText={setName}
                   placeholder="Enter restaurant name"
@@ -249,7 +249,7 @@ export default function Onboarding() {
                   style={styles.icon} 
                 />
                 <TextInput
-                  style={[styles.input, styles.multilineInput]}
+                  style={[styles.input, styles.multilineInput, {outline:'none'}]}
                   value={address}
                   onChangeText={setAddress}
                   placeholder="Enter restaurant address"
@@ -279,7 +279,7 @@ export default function Onboarding() {
                   style={styles.icon} 
                 />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, {outline:'none'}]}
                   value={gstNumber}
                   onChangeText={setGstNumber}
                   placeholder="Enter GST number"
@@ -307,7 +307,7 @@ export default function Onboarding() {
                     style={styles.icon} 
                   />
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, {outline:'none'}]}
                     value={gstPercentage}
                     onChangeText={setGstPercentage}
                     placeholder="e.g. 18"
@@ -335,7 +335,7 @@ export default function Onboarding() {
                     style={styles.icon} 
                   />
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, {outline:'none'}]}
                     value={serviceCharge}
                     onChangeText={setServiceCharge}
                     placeholder="e.g. 5"

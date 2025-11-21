@@ -341,6 +341,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1f2937',
     backgroundColor: 'transparent',
+    outline:'none',
   },
   typeRow: {
     flexDirection: 'row',

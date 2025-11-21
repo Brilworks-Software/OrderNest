@@ -84,7 +84,7 @@ export default function ForgotPassword() {
                 />
                 <TextInput
                   ref={emailInputRef}
-                  style={styles.input}
+                  style={[styles.input,{outline:'none'}]}
                   placeholder="Enter your email"
                   placeholderTextColor="#9ca3af"
                   value={email}

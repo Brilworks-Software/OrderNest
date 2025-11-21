@@ -89,8 +89,17 @@ export interface RegisterCredentials extends AuthCredentials {
       try {
         const user = auth.currentUser;
         if (!user) throw new Error('No authenticated user');
-  
+
         const userId = user.uid;
+        
+        // Delete Firestore user document first (before deleting Auth user)
+        try {
+          await UsersService.deleteUser(userId);
+          console.log('Firestore user document deleted successfully');
+        } catch (firestoreError) {
+          console.log('Error deleting Firestore user document:', firestoreError);
+          // Continue with Auth deletion even if Firestore deletion fails
+        }
         
         // Finally delete Firebase Auth user
         await user.delete();

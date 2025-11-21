@@ -352,6 +352,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111827',
     fontWeight: '500',
+    outline:'none',
   },
   rightIcon: {
     marginLeft: 8,

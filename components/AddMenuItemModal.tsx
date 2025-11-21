@@ -567,6 +567,7 @@ const localStyles = StyleSheet.create({
         paddingHorizontal: 8,
         fontSize: 16,
         color: '#333',
+        outline:'none',
     },
     textArea: {
         height: 80,
