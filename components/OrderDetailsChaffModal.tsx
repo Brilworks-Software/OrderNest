@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
   },
   deliveredItemCard: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#ff6b3520',
     borderColor: '#bbf7d0',
     opacity: 0.8,
   },
