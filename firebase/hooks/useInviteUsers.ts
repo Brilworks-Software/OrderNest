@@ -16,7 +16,7 @@ export function useCreateInviteUser() {
     mutationFn: ({ userId, userData }) =>
       InviteUserService.createInviteUser(userId, userData),
 
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       // Store new document in cache
       if (data && data.id) {
         queryClient.setQueryData(["inviteUser", data.id], data);
@@ -24,6 +24,12 @@ export function useCreateInviteUser() {
 
       // Refresh invite user list if exists
       queryClient.invalidateQueries({ queryKey: ["inviteUsers"] });
+      
+      // Invalidate users query to refresh the users list in real-time
+      // This ensures new users appear immediately after creation
+      if (variables.userData.restaurantId) {
+        queryClient.invalidateQueries({ queryKey: ["users", variables.userData.restaurantId] });
+      }
     },
   });
 

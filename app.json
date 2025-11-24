@@ -40,7 +40,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.brilworks.orderNext",
+      "bundleIdentifier": "com.brilworks.orderNest",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "The app accesses your photos to upload the restaurant profile picture and menu items images."
@@ -51,7 +51,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.brilworks.orderNext",
+      "package": "com.brilworks.orderNest",
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.RECORD_AUDIO",

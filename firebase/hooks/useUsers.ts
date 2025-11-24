@@ -122,11 +122,27 @@ export function useCreateUser() {
 
 
 export function useUsersByRestaurant(restaurantId: string, currentUserId: string) {
-  return useQuery<User[]>({
+  const queryClient = useQueryClient();
+
+  const query = useQuery<User[]>({
     queryKey: ['users', restaurantId],
     queryFn: () =>
       UsersService.fetchAllUsersByRestaurant(restaurantId, currentUserId),
     enabled: !!restaurantId && !!currentUserId,
     staleTime: Infinity,
   });
+
+  useEffect(() => {
+    if (!restaurantId || !currentUserId) return;
+    const unsub = UsersService.subscribeToUsersByRestaurant(
+      restaurantId,
+      currentUserId,
+      (users) => {
+        queryClient.setQueryData(['users', restaurantId], users);
+      }
+    );
+    return () => unsub();
+  }, [restaurantId, currentUserId, queryClient]);
+
+  return query;
 }

@@ -456,7 +456,7 @@ export default function Orders() {
           <TouchableOpacity onPress={() => router.back()}>
             <ArrowLeft />
           </TouchableOpacity>
-          <Text style={styles.header}>Menu Items</Text>
+          <Text style={styles.header}>Orders</Text>
         </View>
 
         {/* Filter Tabs */}

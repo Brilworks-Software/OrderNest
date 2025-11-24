@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:1036400538579:android:8d8a1e490665939ffe7526",
+        "android_client_info": {
+          "package_name": "com.brilworks.orderNest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIJJgSLz-X1wTVdamTnzYEJQp5bNJvOW4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:1036400538579:android:566fee74b6fec1ddfe7526",
         "android_client_info": {
           "package_name": "com.brilworks.orderNext"

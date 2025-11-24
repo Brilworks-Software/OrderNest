@@ -293,20 +293,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerContainer: {
-    flexDirection: 'row',
     marginBottom: 20,
-    marginLeft: 16,
-    gap: 8,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    flexDirection: "row",
+    gap:8,
+    alignItems: "center"
   },
   header: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#333',
+    color: '#1a1a1a',
     letterSpacing: -0.5,
   },
-
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',

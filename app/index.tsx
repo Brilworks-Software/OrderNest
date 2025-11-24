@@ -3,14 +3,34 @@ import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { Hotel } from 'lucide-react-native';
 import { useAuth } from '../firebase/hooks/useAuth';
-import {userStore}  from '@/firebase/stores/userStore';
+import {userStore, UserStore} from '@/firebase/stores/userStore';
 import { useUser } from '@/firebase/hooks/useUsers';
 import { Container } from '@/components/Container';
 
 export default function IndexScreen() {
   const { currentUser, isLoadingUser } = useAuth();
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isLoadingUserType, setIsLoadingUserType] = useState(true);
+  const [userType, setUserType] = useState<'manager' | 'staff' | 'chef' | null>(null);
   const userData = useUser(currentUser?.uid || '').data;
+
+  useEffect(() => {
+    // Fetch user_type from AsyncStorage
+    const fetchUserType = async () => {
+      setIsLoadingUserType(true);
+      try {
+        const type = await UserStore.getUserType();
+        setUserType(type);
+      } catch (error) {
+        console.error('Failed to fetch user type:', error);
+        setUserType(null);
+      } finally {
+        setIsLoadingUserType(false);
+      }
+    };
+
+    fetchUserType();
+  }, []);
 
   useEffect(() => {
     // Give a moment for auth state to initialize
@@ -27,6 +47,7 @@ export default function IndexScreen() {
         if (userData) {
           console.log(userData);
           console.log(userData.isOnboarded);
+          
           
           if(userData.isOnboarded === false) {
             router.replace('/(auth)/onboarding');
@@ -49,11 +70,11 @@ export default function IndexScreen() {
     }
   }, [currentUser, isLoadingUser, isInitializing, userData]);
 
-  if (isInitializing || isLoadingUser) {
+  if (isInitializing || isLoadingUser || isLoadingUserType) {
     return (
-      <Container style={{ backgroundColor: '#3B82F6', padding: 0 }}>
+      <Container style={{ backgroundColor: userType === "chef" ? "#ff6b35dd" : userType === 'manager' ? "#104A9cdd" : userType === 'staff' ? "#10b981dd" : "#fff", padding: 0 }}>
         <View style={styles.loadingContainer}>
-          <View style={styles.logo}>
+          <View style={[styles.logo, { backgroundColor: userType === "chef" ? "#ff6b35" : userType === 'manager' ? "#104A9c" : userType === 'staff' ? "#10b981" : "#fff"}]}>
             <Hotel size={40} color="#ffffff" />
           </View>
           <Text style={styles.appName}>Order Nest</Text>

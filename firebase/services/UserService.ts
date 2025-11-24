@@ -187,4 +187,28 @@ export default class UsersService {
     });
     return users.filter(user => user.id !== userId);
   }
+
+  /**
+   * Subscribe to all users by restaurant with real-time updates
+   */
+  static subscribeToUsersByRestaurant(
+    restaurantId: string,
+    userId: string,
+    callback: (users: User[]) => void
+  ): Unsubscribe {
+    const usersQuery = query(
+      collection(db, this.COLLECTION_NAME),
+      where('restaurantId', '==', restaurantId),
+    );
+    return onSnapshot(usersQuery, (querySnapshot) => {
+      const users: User[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() || {};
+        users.push({ id: doc.id, ...data } as User);
+      });
+      // Filter out the current user
+      const filteredUsers = users.filter(user => user.id !== userId);
+      callback(filteredUsers);
+    });
+  }
 }
