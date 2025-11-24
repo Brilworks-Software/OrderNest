@@ -94,7 +94,11 @@ const EditRestaurantModal: React.FC<EditRestaurantModalProps> = ({
                 },
             });
 
+           if(Platform.OS === "web"){
+            alert('Restaurant information updated successfully')
+           } else{
             Alert.alert('Success', 'Restaurant information updated successfully');
+           }
             onClose();
         } catch (error: any) {
             setRestaurantError(error?.message || 'Failed to update restaurant information');

@@ -78,7 +78,11 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
         try {
             await onUpdatePassword(currentPassword, newPassword);
-            Alert.alert('Success', 'Password changed successfully');
+            if(Platform.OS === "web"){
+                alert('Password changed successfully');
+            } else{
+                Alert.alert('Success', 'Password changed successfully');
+            }
             handleClose();
         } catch (error: any) {
             setPasswordError(error?.message || 'Failed to change password');

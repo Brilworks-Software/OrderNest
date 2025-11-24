@@ -72,7 +72,12 @@ export default function SignUp() {
     }
     try {
       await signUp({ email, password, type: 'manager' });
-      Alert.alert('Success', 'Account created successfully!');
+      if(Platform.OS === "web"){
+        alert("Account created successfully!")
+      }else{
+        Alert.alert('Success', 'Account created successfully!');
+
+      }
       router.replace('/');
     } catch (err) {
       setError(signUpError?.message || 'Sign up failed.');

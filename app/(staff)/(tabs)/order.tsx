@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, TouchableOpacity, Alert, Platform } from 'react-native';
 import { useOrdersByWaiter } from '@/firebase/hooks/useOrder';
 import { useTables } from '@/firebase/hooks/useTable';
 import type { Order } from '@/firebase/types';
@@ -129,7 +129,11 @@ export default function order() {
     
     const handleGenerateBill = () => {
       if (!allItemsDelivered) {
-        Alert.alert('Cannot Generate Bill', 'All items must be delivered before generating a bill.');
+        if(Platform.OS === "web"){
+          alert('All items must be delivered before generating a bill.');
+        } else{
+          Alert.alert('Cannot Generate Bill', 'All items must be delivered before generating a bill.');
+        }
         return;
       }
       

@@ -23,6 +23,7 @@ export default function Tables() {
   const createTable = useCreateTable();
   const updateTable = useUpdateTable();
   const [isModalVisible, setModalVisible] = useState(false);
+  const [editingTable, setEditingTable] = useState<Table | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'available' | 'occupied' | 'reserved'>('all');
 
   if (isLoading) {
@@ -90,21 +91,31 @@ export default function Tables() {
     };
 
     const onDelete = () => {
-      Alert.alert(
-        `Delete Table ${item.table_number ?? item.id}`,
-        `Are you sure you want to delete this table? This action cannot be undone.`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: () => {
-              console.log('Deleting Table ID: ', item.id);
-              deleteTable.mutate({ tableId: item.id });
+      if (Platform.OS === 'web') {
+        const confirmed = window.confirm(
+          `Delete Table ${item.table_number ?? item.id}\n\nAre you sure you want to delete this table? This action cannot be undone.`
+        );
+        if (confirmed) {
+          console.log('Deleting Table ID: ', item.id);
+          deleteTable.mutate({ tableId: item.id });
+        }
+      } else {
+        Alert.alert(
+          `Delete Table ${item.table_number ?? item.id}`,
+          `Are you sure you want to delete this table? This action cannot be undone.`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Delete',
+              style: 'destructive',
+              onPress: () => {
+                console.log('Deleting Table ID: ', item.id);
+                deleteTable.mutate({ tableId: item.id });
+              },
             },
-          },
-        ]
-      );
+          ]
+        );
+      }
     };
 
     const getStatusColor = (status: string) => {
@@ -124,7 +135,14 @@ export default function Tables() {
     const statusIcon = item.status === 'available' ? '✓' : item.status === 'occupied' ? '●' : '🔒';
 
     return (
-      <View style={[styles.row, { borderLeftColor: statusColor }]}>
+      <TouchableOpacity 
+        style={[styles.row, { borderLeftColor: statusColor }]}
+        onPress={() => {
+          setEditingTable(item);
+          setModalVisible(true);
+        }}
+        activeOpacity={0.7}
+      >
         <View style={styles.left}>
           <View style={[styles.badge, { backgroundColor: statusColor + '15' }]}>
             <Text style={[styles.badgeText, { color: statusColor }]}>
@@ -134,7 +152,9 @@ export default function Tables() {
         </View>
 
         <View style={styles.info}>
-          <Text style={styles.title}>Table {item.table_number ?? item.id}</Text>
+          <Text style={styles.title}>
+            {item.table_name || `Table ${item.table_number ?? item.id}`}
+          </Text>
           <View style={styles.metaRow}>
             <View style={[styles.statusPill, { backgroundColor: statusColor + '20' }]}>
               <Text style={[styles.statusIcon, { color: statusColor, marginRight: 6 }]}>{statusIcon}</Text>
@@ -148,14 +168,23 @@ export default function Tables() {
         <View style={styles.actions}>
           <TouchableOpacity
             ref={buttonRef}
-            onPress={openMenu}
+            onPress={(e) => {
+              e.stopPropagation();
+              openMenu();
+            }}
             style={[styles.actionButtonSmall, { backgroundColor: statusColor }]}
             activeOpacity={0.8}
           >
             <Text style={styles.actionText}>{item.status === 'available' ? 'Available' : item.status === 'occupied' ? 'Occupied' : 'Reserved'}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={onDelete} style={[styles.actionButtonSmall, styles.delete]}>
+          <TouchableOpacity 
+            onPress={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }} 
+            style={[styles.actionButtonSmall, styles.delete]}
+          >
             <Trash2 size={18} color={"#ff0000"} />
           </TouchableOpacity>
         </View>
@@ -167,18 +196,19 @@ export default function Tables() {
           options={statuses}
           onSelect={(k) => onSelectStatus(k)}
         />
-      </View>
+      </TouchableOpacity>
     );
   };
 
   const onAdd = () => {
     console.log("Add Pressed");
-    
+    setEditingTable(null);
     setModalVisible(true);
   };
 
   const handleCloseModal = () => {
     setModalVisible(false);
+    setEditingTable(null);
   };
 
   const handleSubmit = (table: Table, mode: 'create' | 'edit') => {
@@ -187,7 +217,12 @@ export default function Tables() {
       // pass restaurantId as the first arg so the service can associate the new table
       createTable.mutate(
         { tableId: `${table.id}`, tableData: (table as any) },
-        { onSuccess: () => setModalVisible(false) }
+        { 
+          onSuccess: () => {
+            setModalVisible(false);
+            setEditingTable(null);
+          }
+        }
       );
       return;
     }
@@ -200,7 +235,12 @@ export default function Tables() {
 
     updateTable.mutate(
       { tableId: table.id, updates: table },
-      { onSuccess: () => setModalVisible(false) }
+      { 
+        onSuccess: () => {
+          setModalVisible(false);
+          setEditingTable(null);
+        }
+      }
     );
   };
 
@@ -348,6 +388,7 @@ export default function Tables() {
       </View>
       <TableModal
         visible={isModalVisible}
+        table={editingTable || undefined}
         onClose={handleCloseModal}
         restaurantId={restaurantId}
         onSubmit={handleSubmit as (table: any, mode: "create" | "edit") => void | Promise<void>}

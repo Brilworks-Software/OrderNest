@@ -21,6 +21,7 @@ interface OrderDetailsModalProps {
   onClose: () => void;
   order: Order | null;
   restaurantId: string;
+  theme: string;
 }
 
 interface OrderItemWithDetails extends OrderItem {
@@ -32,6 +33,7 @@ export default function OrderDetailsModal({
   onClose,
   order,
   restaurantId,
+  theme,
 }: OrderDetailsModalProps) {
   const { data: menuItems, isLoading: isLoadingMenuItems } = useMenuItems(restaurantId);
   const { data: tables } = useTables(restaurantId);
@@ -136,8 +138,8 @@ export default function OrderDetailsModal({
           <View style={styles.orderInfoSection}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Status:</Text>
-              <View style={[styles.statusBadge, { backgroundColor: currentOrder.status === 'pending' ? '#ff9f0a20' : '#34c75920' }]}>
-                <Text style={[styles.statusText, { color: currentOrder.status === 'pending' ? '#ff9f0a' : '#34c759' }]}>
+              <View style={[styles.statusBadge, { backgroundColor: (theme + 20) }]}>
+                <Text style={[styles.statusText, { color: theme }]}>
                   {currentOrder.status}
                 </Text>
               </View>
@@ -202,6 +204,7 @@ export default function OrderDetailsModal({
                         style={[
                           styles.deliveredButton,
                           updatingItemIndex === originalIndex && styles.deliveredButtonDisabled,
+                          {backgroundColor: theme}
                         ]}
                         onPress={() => originalIndex >= 0 && handleMarkAsDelivered(originalIndex)}
                         disabled={updatingItemIndex === originalIndex || updatingItemIndex !== null}
@@ -224,7 +227,7 @@ export default function OrderDetailsModal({
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Delivered Items ({deliveredItems.length})</Text>
                 {deliveredItems.map((item, index) => (
-                  <View key={`delivered-${item.menu_item_id}-${index}`} style={[styles.itemCard, styles.deliveredItemCard]}>
+                  <View key={`delivered-${item.menu_item_id}-${index}`} style={[styles.itemCard, styles.deliveredItemCard, {backgroundColor: (theme + 20)}]}>
                     <View style={styles.itemLeft}>
                       {item.menuItem?.image_url ? (
                         <Image
@@ -242,7 +245,7 @@ export default function OrderDetailsModal({
                           <Text style={styles.itemName} numberOfLines={2}>
                             {item.menuItem?.name || 'Unknown Item'}
                           </Text>
-                          <View style={styles.deliveredBadge}>
+                          <View style={[styles.deliveredBadge, {backgroundColor: theme}]}>
                             <Text style={styles.deliveredBadgeText}>✓ Delivered</Text>
                           </View>
                         </View>
