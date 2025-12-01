@@ -9,7 +9,9 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-.yarn/
+.yarn/*
+!.yarn/releases
+!.yarn/releases/*
 .env
 # expo router
 expo-env.d.ts
