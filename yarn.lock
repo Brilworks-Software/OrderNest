@@ -2982,6 +2982,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-firebase/analytics@npm:^23.7.0":
+  version: 23.7.0
+  resolution: "@react-native-firebase/analytics@npm:23.7.0"
+  dependencies:
+    superstruct: "npm:^2.0.2"
+  peerDependencies:
+    "@react-native-firebase/app": 23.7.0
+  checksum: 10c0/e0c435b828841e2870ae7331975068a8bf32d2c3e120efb209c4da9ecb0929780a8a240c43aa5e4cc5afa9fff9ca63b54fc7dbe2c8a2a4665e10e3f17e9def06
+  languageName: node
+  linkType: hard
+
 "@react-native/assets-registry@npm:0.81.5":
   version: 0.81.5
   resolution: "@react-native/assets-registry@npm:0.81.5"
@@ -3780,6 +3791,7 @@ __metadata:
     "@babel/core": "npm:^7.20.0"
     "@expo/vector-icons": "npm:^15.0.2"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
+    "@react-native-firebase/analytics": "npm:^23.7.0"
     "@react-navigation/native": "npm:^7.1.6"
     "@tanstack/react-query": "npm:^5.90.7"
     "@types/react": "npm:~19.1.10"
@@ -10389,6 +10401,13 @@ __metadata:
     sucrase: bin/sucrase
     sucrase-node: bin/sucrase-node
   checksum: 10c0/ac85f3359d2c2ecbf5febca6a24ae9bf96c931f05fde533c22a94f59c6a74895e5d5f0e871878dfd59c2697a75ebb04e4b2224ef0bfc24ca1210735c2ec191ef
+  languageName: node
+  linkType: hard
+
+"superstruct@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "superstruct@npm:2.0.2"
+  checksum: 10c0/c6853db5240b4920f47b3c864dd1e23ede6819ea399ad29a65387d746374f6958c5f1c5b7e5bb152d9db117a74973e5005056d9bb83c24e26f18ec6bfae4a718
   languageName: node
   linkType: hard
 

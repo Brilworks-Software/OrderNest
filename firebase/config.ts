@@ -1,7 +1,8 @@
 import { FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth, initializeAuth, getReactNativePersistence, Auth } from 'firebase/auth';
+import { getAuth, initializeAuth, Auth, getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAnalytics, Analytics, isSupported } from 'firebase/analytics';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -31,6 +32,7 @@ if (!getApps().length) {
     if (Platform.OS === 'web') {
       auth = getAuth(app); // Web: No persistence needed here
     } else {
+      // Dynamically import getReactNativePersistence for mobile only
       auth = initializeAuth(app, {
         persistence: getReactNativePersistence(AsyncStorage),
       });
@@ -42,4 +44,14 @@ if (!getApps().length) {
   const db = getFirestore(app);
   const storage = getStorage(app);
 
-export { app, auth, db, storage };
+// Initialize Analytics (web only - mobile uses @react-native-firebase/analytics)
+let analytics: Analytics | null = null;
+if (Platform.OS === 'web') {
+  isSupported().then((supported) => {
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
+  });
+}
+
+export { app, auth, db, storage, analytics };
