@@ -1,87 +1,77 @@
 import { useCallback } from 'react';
-import AnalyticsService from '../services/AnalyticsService';
+import analyticsService from '../services/AnalyticsService';
 
 /**
- * Hook for using Firebase Analytics
- * Provides easy access to analytics methods
+ * Custom hook for Firebase Analytics
+ * Provides easy access to analytics functions in React components
+ * 
+ * @example
+ * ```tsx
+ * const { logEvent, logScreenView, setUserId } = useAnalytics();
+ * 
+ * useEffect(() => {
+ *   logScreenView('HomeScreen');
+ * }, []);
+ * 
+ * const handleButtonClick = () => {
+ *   logEvent('button_click', { button_name: 'submit' });
+ * };
+ * ```
  */
-export function useAnalytics() {
+export const useAnalytics = () => {
   const logEvent = useCallback(
     (eventName: string, params?: Record<string, any>) => {
-      return AnalyticsService.logEvent(eventName, params);
+      return analyticsService.logEvent(eventName, params);
     },
     []
   );
 
   const logScreenView = useCallback(
     (screenName: string, screenClass?: string) => {
-      return AnalyticsService.logScreenView(screenName, screenClass);
+      return analyticsService.logScreenView(screenName, screenClass);
+    },
+    []
+  );
+
+  const logLogin = useCallback((method: string) => {
+    return analyticsService.logLogin(method);
+  }, []);
+
+  const logSignUp = useCallback((method: string) => {
+    return analyticsService.logSignUp(method);
+  }, []);
+
+  const logButtonClick = useCallback(
+    (buttonName: string, location?: string) => {
+      return analyticsService.logButtonClick(buttonName, location);
     },
     []
   );
 
   const setUserId = useCallback((userId: string | null) => {
-    return AnalyticsService.setUserId(userId);
+    return analyticsService.setUserId(userId);
   }, []);
 
-  const setUserProperties = useCallback((properties: Record<string, any>) => {
-    return AnalyticsService.setUserProperties(properties);
-  }, []);
-
-  const logLogin = useCallback((method?: string) => {
-    return AnalyticsService.logLogin(method);
-  }, []);
-
-  const logSignUp = useCallback((method?: string) => {
-    return AnalyticsService.logSignUp(method);
-  }, []);
-
-  const logPurchase = useCallback(
-    (
-      value: number,
-      currency?: string,
-      items?: Array<{ item_id: string; item_name: string; price: number; quantity: number }>
-    ) => {
-      return AnalyticsService.logPurchase(value, currency, items);
+  const setUserProperty = useCallback(
+    (name: string, value: string | null) => {
+      return analyticsService.setUserProperty(name, value);
     },
     []
   );
 
-  const logAddToCart = useCallback(
-    (itemId: string, itemName: string, value: number, currency?: string) => {
-      return AnalyticsService.logAddToCart(itemId, itemName, value, currency);
-    },
-    []
-  );
-
-  const logViewItem = useCallback(
-    (
-      itemId: string,
-      itemName: string,
-      itemCategory?: string,
-      value?: number,
-      currency?: string
-    ) => {
-      return AnalyticsService.logViewItem(itemId, itemName, itemCategory, value, currency);
-    },
-    []
-  );
-
-  const resetAnalyticsData = useCallback(() => {
-    return AnalyticsService.resetAnalyticsData();
+  const setAnalyticsCollectionEnabled = useCallback((enabled: boolean) => {
+    return analyticsService.setAnalyticsCollectionEnabled(enabled);
   }, []);
 
   return {
     logEvent,
     logScreenView,
-    setUserId,
-    setUserProperties,
     logLogin,
     logSignUp,
-    logPurchase,
-    logAddToCart,
-    logViewItem,
-    resetAnalyticsData,
+    logButtonClick,
+    setUserId,
+    setUserProperty,
+    setAnalyticsCollectionEnabled,
   };
-}
+};
 

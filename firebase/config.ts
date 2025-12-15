@@ -1,8 +1,8 @@
 import { FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth, initializeAuth, Auth, getReactNativePersistence } from 'firebase/auth';
+import { getAuth, initializeAuth, getReactNativePersistence, Auth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import { getAnalytics, Analytics, isSupported } from 'firebase/analytics';
+import { getAnalytics, Analytics } from 'firebase/analytics';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -11,18 +11,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  
 // Firebase configuration from Expo Constants
 const firebaseConfig = {
-  apiKey: "AIzaSyCmO2oLsmru-Z35mdJaCb8zR2qsSvFrJEk",
-  authDomain: "ordernest-8da3a.firebaseapp.com",
-  projectId: "ordernest-8da3a",
-  storageBucket: "ordernest-8da3a.firebasestorage.app",
-  messagingSenderId: "1036400538579",
-  appId: "1:1036400538579:web:c1b3c8a0fd36cbf8fe7526",
-  measurementId: "G-S8FTKCERNX"
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
 let app: FirebaseApp;
 let auth: Auth;
+let analytics: Analytics | null = null;
 
 // Initialize Firebase services
 if (!getApps().length) {
@@ -32,7 +33,6 @@ if (!getApps().length) {
     if (Platform.OS === 'web') {
       auth = getAuth(app); // Web: No persistence needed here
     } else {
-      // Dynamically import getReactNativePersistence for mobile only
       auth = initializeAuth(app, {
         persistence: getReactNativePersistence(AsyncStorage),
       });
@@ -44,14 +44,18 @@ if (!getApps().length) {
   const db = getFirestore(app);
   const storage = getStorage(app);
 
-// Initialize Analytics (web only - mobile uses @react-native-firebase/analytics)
-let analytics: Analytics | null = null;
-if (Platform.OS === 'web') {
-  isSupported().then((supported) => {
-    if (supported) {
-      analytics = getAnalytics(app);
+  // Initialize Analytics (only supported on web)
+  if (Platform.OS === 'web') {
+    try {
+      // Check if analytics is supported before initializing
+      // For web, we can initialize synchronously
+      if (typeof window !== 'undefined') {
+        analytics = getAnalytics(app);
+      }
+    } catch (error) {
+      console.warn('Error initializing Firebase Analytics:', error);
+      analytics = null;
     }
-  });
-}
+  }
 
 export { app, auth, db, storage, analytics };

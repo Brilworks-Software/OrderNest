@@ -1,85 +1,152 @@
-import { Platform } from 'react-native';
+import { Analytics, logEvent, setUserId, setUserProperties, setAnalyticsCollectionEnabled } from 'firebase/analytics';
 import { analytics } from '../config';
-import { logEvent, setUserId, setUserProperties, setAnalyticsCollectionEnabled } from 'firebase/analytics';
-import analyticsModule from '@react-native-firebase/analytics';
+import { Platform } from 'react-native';
 
-/**
- * AnalyticsService - Unified service for Firebase Analytics
- * Supports both web (firebase/analytics) and mobile (@react-native-firebase/analytics)
- */
-class AnalyticsService {
-  private isWeb = Platform.OS === 'web';
-  private isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
+// Import React Native Firebase Analytics for mobile platforms (modular API)
+let nativeAnalytics: any = null;
+let getAnalyticsRNFB: (() => any) | null = null;
+let setUserIdRNFB: ((analytics: any, userId: string | null) => Promise<void>) | null = null;
+let setUserPropertyRNFB: ((analytics: any, name: string, value: string | null) => Promise<void>) | null = null;
+let logEventRNFB: ((analytics: any, eventName: string, params?: Record<string, any>) => Promise<void>) | null = null;
+let setAnalyticsCollectionEnabledRNFB: ((analytics: any, enabled: boolean) => Promise<void>) | null = null;
+
+if (Platform.OS !== 'web') {
+  try {
+    const analyticsModule = require('@react-native-firebase/analytics');
+    // Use modular API (available in v23+)
+    if (analyticsModule.getAnalytics && analyticsModule.setUserId && analyticsModule.setUserProperty && analyticsModule.logEvent) {
+      getAnalyticsRNFB = analyticsModule.getAnalytics;
+      setUserIdRNFB = analyticsModule.setUserId;
+      setUserPropertyRNFB = analyticsModule.setUserProperty;
+      logEventRNFB = analyticsModule.logEvent;
+      setAnalyticsCollectionEnabledRNFB = analyticsModule.setAnalyticsCollectionEnabled;
+      if (getAnalyticsRNFB) {
+        nativeAnalytics = getAnalyticsRNFB();
+      }
+    } else {
+      // Fallback to default export (deprecated but still works)
+      nativeAnalytics = analyticsModule.default();
+    }
+  } catch (error) {
+    console.warn('@react-native-firebase/analytics not available:', error);
+  }
+}
+
+export interface AnalyticsService {
+  logEvent: (eventName: string, params?: Record<string, any>) => Promise<void>;
+  setUserId: (userId: string | null) => Promise<void>;
+  setUserProperty: (name: string, value: string | null) => Promise<void>;
+  setAnalyticsCollectionEnabled: (enabled: boolean) => Promise<void>;
+}
+
+class FirebaseAnalyticsService implements AnalyticsService {
+  private analytics: Analytics | null;
+
+  constructor() {
+    this.analytics = analytics;
+  }
 
   /**
    * Log a custom event
-   * @param eventName - Name of the event
-   * @param params - Optional event parameters
+   * @param eventName - The name of the event
+   * @param params - Optional parameters to attach to the event
    */
   async logEvent(eventName: string, params?: Record<string, any>): Promise<void> {
     try {
-      if (this.isWeb && analytics) {
-        logEvent(analytics, eventName, params);
-      } else if (this.isMobile) {
-        await analyticsModule().logEvent(eventName, params);
+      if (Platform.OS === 'web') {
+        // Web: Use Firebase web SDK
+        if (!this.analytics) {
+          console.warn('Analytics is not initialized');
+          return;
+        }
+        logEvent(this.analytics, eventName, params);
+      } else {
+        // Mobile: Use React Native Firebase (modular API)
+        if (nativeAnalytics) {
+          if (logEventRNFB && nativeAnalytics) {
+            // Use modular API: logEvent(analytics, eventName, params)
+            await logEventRNFB(nativeAnalytics, eventName, params || {});
+          } else {
+            // Fallback to deprecated instance method
+            await nativeAnalytics.logEvent(eventName, params || {});
+          }
+        } else {
+          if (__DEV__) {
+            console.log('[Analytics Event]', eventName, params);
+          }
+        }
       }
     } catch (error) {
-      console.error('Analytics logEvent error:', error);
+      console.error('Error logging analytics event:', error);
     }
   }
 
   /**
    * Set the user ID for analytics
-   * @param userId - User ID to set
+   * @param userId - The user ID to set, or null to clear it
    */
   async setUserId(userId: string | null): Promise<void> {
     try {
-      if (this.isWeb && analytics) {
-        setUserId(analytics, userId);
-      } else if (this.isMobile) {
-        // Mobile analytics accepts string | null, convert undefined to null
-        const mobileUserId = userId === undefined ? null : userId;
-        await analyticsModule().setUserId(mobileUserId);
-      }
-    } catch (error) {
-      console.error('Analytics setUserId error:', error);
-    }
-  }
-
-  /**
-   * Set user properties
-   * @param properties - User properties object
-   */
-  async setUserProperties(properties: Record<string, any>): Promise<void> {
-    try {
-      if (this.isWeb && analytics) {
-        setUserProperties(analytics, properties);
-      } else if (this.isMobile) {
-        // For mobile, set properties individually
-        for (const [key, value] of Object.entries(properties)) {
-          await analyticsModule().setUserProperty(key, String(value));
+      if (Platform.OS === 'web') {
+        // Web: Use Firebase web SDK
+        if (!this.analytics) {
+          console.warn('Analytics is not initialized');
+          return;
+        }
+        setUserId(this.analytics, userId);
+      } else {
+        // Mobile: Use React Native Firebase (modular API)
+        if (nativeAnalytics) {
+          if (setUserIdRNFB && nativeAnalytics) {
+            // Use modular API: setUserId(analytics, userId)
+            await setUserIdRNFB(nativeAnalytics, userId);
+          } else {
+            // Fallback to deprecated instance method
+            await nativeAnalytics.setUserId(userId);
+          }
+        } else {
+          if (__DEV__) {
+            console.log('[Analytics] Set User ID:', userId);
+          }
         }
       }
     } catch (error) {
-      console.error('Analytics setUserProperties error:', error);
+      console.error('Error setting analytics user ID:', error);
     }
   }
 
   /**
-   * Log a screen view
-   * Uses logEvent with 'screen_view' event name (recommended approach, replaces deprecated logScreenView)
-   * @param screenName - Name of the screen
-   * @param screenClass - Optional screen class
+   * Set a user property
+   * @param name - The name of the property
+   * @param value - The value of the property, or null to clear it
    */
-  async logScreenView(screenName: string, screenClass?: string): Promise<void> {
+  async setUserProperty(name: string, value: string | null): Promise<void> {
     try {
-      // Use logEvent with 'screen_view' event name for both platforms (non-deprecated approach)
-      await this.logEvent('screen_view', {
-        screen_name: screenName,
-        screen_class: screenClass || screenName,
-      });
+      if (Platform.OS === 'web') {
+        // Web: Use Firebase web SDK
+        if (!this.analytics) {
+          console.warn('Analytics is not initialized');
+          return;
+        }
+        setUserProperties(this.analytics, { [name]: value });
+      } else {
+        // Mobile: Use React Native Firebase (modular API)
+        if (nativeAnalytics) {
+          if (setUserPropertyRNFB && nativeAnalytics) {
+            // Use modular API: setUserProperty(analytics, name, value)
+            await setUserPropertyRNFB(nativeAnalytics, name, value);
+          } else {
+            // Fallback to deprecated instance method
+            await nativeAnalytics.setUserProperty(name, value);
+          }
+        } else {
+          if (__DEV__) {
+            console.log('[Analytics] Set User Property:', name, value);
+          }
+        }
+      }
     } catch (error) {
-      console.error('Analytics logScreenView error:', error);
+      console.error('Error setting analytics user property:', error);
     }
   }
 
@@ -89,112 +156,76 @@ class AnalyticsService {
    */
   async setAnalyticsCollectionEnabled(enabled: boolean): Promise<void> {
     try {
-      if (this.isWeb && analytics) {
-        setAnalyticsCollectionEnabled(analytics, enabled);
-      } else if (this.isMobile) {
-        await analyticsModule().setAnalyticsCollectionEnabled(enabled);
+      if (Platform.OS === 'web') {
+        // Web: Use Firebase web SDK
+        if (!this.analytics) {
+          console.warn('Analytics is not initialized');
+          return;
+        }
+        setAnalyticsCollectionEnabled(this.analytics, enabled);
+      } else {
+        // Mobile: Use React Native Firebase (modular API)
+        if (nativeAnalytics) {
+          if (setAnalyticsCollectionEnabledRNFB && nativeAnalytics) {
+            // Use modular API: setAnalyticsCollectionEnabled(analytics, enabled)
+            await setAnalyticsCollectionEnabledRNFB(nativeAnalytics, enabled);
+          } else {
+            // Fallback to deprecated instance method
+            await nativeAnalytics.setAnalyticsCollectionEnabled(enabled);
+          }
+        } else {
+          if (__DEV__) {
+            console.log('[Analytics] Collection Enabled:', enabled);
+          }
+        }
       }
     } catch (error) {
-      console.error('Analytics setAnalyticsCollectionEnabled error:', error);
+      console.error('Error setting analytics collection enabled:', error);
     }
   }
 
   /**
-   * Reset analytics data (useful for logout)
+   * Helper method to log screen views
+   * @param screenName - The name of the screen
+   * @param screenClass - Optional screen class
    */
-  async resetAnalyticsData(): Promise<void> {
-    try {
-      if (this.isMobile) {
-        await analyticsModule().resetAnalyticsData();
-      }
-      // Web doesn't have a reset method, but we can clear user ID
-      if (this.isWeb && analytics) {
-        setUserId(analytics, null);
-      }
-    } catch (error) {
-      console.error('Analytics resetAnalyticsData error:', error);
-    }
-  }
-
-  /**
-   * Log a login event
-   * @param method - Login method used
-   */
-  async logLogin(method?: string): Promise<void> {
-    await this.logEvent('login', method ? { method } : undefined);
-  }
-
-  /**
-   * Log a signup event
-   * @param method - Signup method used
-   */
-  async logSignUp(method?: string): Promise<void> {
-    await this.logEvent('sign_up', method ? { method } : undefined);
-  }
-
-  /**
-   * Log a purchase event
-   * @param value - Purchase value
-   * @param currency - Currency code (e.g., 'USD')
-   * @param items - Array of purchased items
-   */
-  async logPurchase(
-    value: number,
-    currency: string = 'USD',
-    items?: Array<{ item_id: string; item_name: string; price: number; quantity: number }>
-  ): Promise<void> {
-    await this.logEvent('purchase', {
-      value,
-      currency,
-      items,
+  async logScreenView(screenName: string, screenClass?: string): Promise<void> {
+    await this.logEvent('screen_view', {
+      screen_name: screenName,
+      screen_class: screenClass || screenName,
     });
   }
 
   /**
-   * Log an add to cart event
-   * @param itemId - Item ID
-   * @param itemName - Item name
-   * @param value - Item value
-   * @param currency - Currency code
+   * Helper method to log user login
+   * @param method - The login method used
    */
-  async logAddToCart(
-    itemId: string,
-    itemName: string,
-    value: number,
-    currency: string = 'USD'
-  ): Promise<void> {
-    await this.logEvent('add_to_cart', {
-      item_id: itemId,
-      item_name: itemName,
-      value,
-      currency,
-    });
+  async logLogin(method: string): Promise<void> {
+    await this.logEvent('login', { method });
   }
 
   /**
-   * Log a view item event
-   * @param itemId - Item ID
-   * @param itemName - Item name
-   * @param itemCategory - Item category
-   * @param value - Item value
-   * @param currency - Currency code
+   * Helper method to log user signup
+   * @param method - The signup method used
    */
-  async logViewItem(
-    itemId: string,
-    itemName: string,
-    itemCategory?: string,
-    value?: number,
-    currency: string = 'USD'
-  ): Promise<void> {
-    await this.logEvent('view_item', {
-      item_id: itemId,
-      item_name: itemName,
-      item_category: itemCategory,
-      value,
-      currency,
+  async logSignUp(method: string): Promise<void> {
+    await this.logEvent('sign_up', { method });
+  }
+
+  /**
+   * Helper method to log button clicks
+   * @param buttonName - The name of the button
+   * @param location - Optional location context
+   */
+  async logButtonClick(buttonName: string, location?: string): Promise<void> {
+    await this.logEvent('button_click', {
+      button_name: buttonName,
+      location: location,
     });
   }
 }
 
-export default new AnalyticsService();
+// Export a singleton instance
+const analyticsService = new FirebaseAnalyticsService();
+export default analyticsService;
 
