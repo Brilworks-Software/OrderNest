@@ -8,6 +8,7 @@ import {
 import { useCreateUser } from './useUsers';
 import type { User } from 'firebase/auth';
 import { userStore } from '../stores/userStore';
+import analyticsService from '../services/AnalyticsService';
 
 export const useAuth = () => {
   const queryClient = useQueryClient();
@@ -30,12 +31,20 @@ export const useAuth = () => {
         queryClient.invalidateQueries({ queryKey: ['currentUser'] });
         queryClient.invalidateQueries({ queryKey: ['user', user.uid] });
         
+        // Set user ID for analytics
+        await analyticsService.setUserId(user.uid);
         
+        // Set user properties
+        await analyticsService.setUserProperty('email', user.email || null);
+        await analyticsService.setUserProperty('email_domain', user.email?.split('@')[1] || null);
       } else {
         // User is signed out - clear user data and reset FCM token flag
         userStore.clearUser();
         queryClient.clear();
         setFcmTokenRegistered(false);
+
+        // Clear user ID for analytics
+        await analyticsService.setUserId(null);
       }
     });
 
@@ -43,8 +52,12 @@ export const useAuth = () => {
   }, [queryClient, fcmTokenRegistered]);
 
   const signInMutation = useMutation({
-    mutationFn: (credentials: AuthCredentials) =>
-      authService.signIn(credentials),
+    mutationFn: async (credentials: AuthCredentials) => {
+      const result = await authService.signIn(credentials);
+      // Log login event
+      await analyticsService.logLogin('email');
+      return result;
+    },
     // Auth state listener will handle query invalidation
   });
 
@@ -63,6 +76,9 @@ export const useAuth = () => {
           }
         });
         
+        // Log signup event
+        await analyticsService.logSignUp('email');
+        
         // FCM token will be added automatically by the auth state listener
       }
       
@@ -72,7 +88,9 @@ export const useAuth = () => {
   });
 
   const signOutMutation = useMutation({
-    mutationFn: async () => {      
+    mutationFn: async () => {
+      // Log sign out event
+      await analyticsService.logEvent('logout');
       // Then sign out
       return authService.signOut();
     },
