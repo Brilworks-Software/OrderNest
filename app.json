@@ -3,7 +3,7 @@
     "name": "OrderNest",
     "slug": "OrderNest",
     "version": "1.0.0",
-    "scheme": "OrderNest",
+    "scheme": "ordernest",
     "platforms": [
       "ios",
       "android",
@@ -44,7 +44,8 @@
       "bundleIdentifier": "com.brilworks.orderNest",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "The app accesses your photos to upload the restaurant profile picture and menu items images."
+        "NSPhotoLibraryUsageDescription": "The app accesses your photos to upload the restaurant profile picture and menu items images.",
+        "NSUserTrackingUsageDescription": "This app uses tracking to provide personalized ads and analytics."
       }
     },
     "android": {
@@ -56,7 +57,7 @@
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.RECORD_AUDIO"
+        "com.google.android.gms.permission.AD_ID"
       ]
     },
     "extra": {
