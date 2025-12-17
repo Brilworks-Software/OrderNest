@@ -23,11 +23,24 @@
         }
       ],
       "expo-localization",
+      "@react-native-firebase/app",
       [
         "expo-build-properties",
         {
           "ios": {
-            "useModularHeaders": true
+            "useFrameworks": "static",
+            "modularHeaders": true,
+            "forceStaticLinking": [
+              "@react-native-firebase/app",
+              "RNFBApp"
+            ]
+          },
+          "android": {
+            "enableProguardInReleaseBuilds": false,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0",
+            "enableMinifyInReleaseBuilds": false
           }
         }
       ]
@@ -53,7 +66,8 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "The app accesses your photos to upload the restaurant profile picture and menu items images.",
-        "NSUserTrackingUsageDescription": "This app uses tracking to provide personalized ads and analytics."
+        "NSUserTrackingUsageDescription": "This app uses tracking to provide personalized ads and analytics.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
