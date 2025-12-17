@@ -22,7 +22,15 @@
           "photosPermission": "The app accesses your photos to upload the restaurant profile picture and menu items images."
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useModularHeaders": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

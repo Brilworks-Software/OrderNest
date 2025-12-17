@@ -1,5 +1,30 @@
+# Yarn
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+.pnp.*
+.yarn/install-state.gz
+
+# Node
 node_modules/
+
+# Expo
 .expo/
+.expo-shared/
+
+# iOS
+ios/Pods/
+ios/Podfile.lock
+ios/build/
+
+# Android
+android/build/
+android/.gradle/
+
+# Other
 dist/
 npm-debug.*
 *.jks
@@ -9,9 +34,6 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-.yarn/*
-!.yarn/releases
-!.yarn/releases/*
 .env
 # expo router
 expo-env.d.ts
