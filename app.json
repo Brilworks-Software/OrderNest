@@ -66,7 +66,6 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "The app accesses your photos to upload the restaurant profile picture and menu items images.",
-        "NSUserTrackingUsageDescription": "This app uses tracking to provide personalized ads and analytics.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
