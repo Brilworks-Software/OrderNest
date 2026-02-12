@@ -10,66 +10,51 @@ import { Platform } from 'react-native';
 import posthog from 'posthog-js';
 import { PostHogProvider } from 'posthog-react-native';
 import { useScreenTracking as PostHogScreenTracking } from '@/posthog/useScreenTracking';
-// Create a client
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 5,
       retry: 1,
     },
   },
 });
 
 function AppContent() {
-  // Automatically track screen changes
-  
   useUserTracking();
   useScreenTracking({
     enabled: true,
-    debounce: false, // Set to true if you want to debounce rapid navigation changes
+    debounce: false, 
   });
 
-  // Automatically sync user properties with analytics
-  useUserTracking();
   PostHogScreenTracking();
 
   return (
-    
-      <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(manager)" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-    
-  );
-}
-export default function RootLayout() {
-  useFrameworkReady();
-
-  return (
-    <PostHogUniversalProvider>
-    <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <AppContent />
-        <StatusBar style="dark" />
-      </QueryClientProvider>
-    </SafeAreaProvider>
-    </PostHogUniversalProvider>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(manager)" />
+      <Stack.Screen name="+not-found" />
+    </Stack>
   );
 }
 
+// Fixed Provider to prevent Build-time loops
 const PostHogUniversalProvider = ({ children }: { children: React.ReactNode }) => {
+  // 1. Web initialization guard
   if (Platform.OS === 'web') {
-    posthog.init(process.env.EXPO_PUBLIC_POST_HOG_API_KEY || "", {
-      api_host: 'https://us.i.posthog.com',
-      autocapture: true,
-        capture_pageview: false, // we’ll control pageview manually
-    });
-
-    return children;
+    // ONLY run in browser (window exists) and ONLY if not already loaded
+    if (typeof window !== 'undefined' && !posthog.__loaded) {
+      posthog.init(process.env.EXPO_PUBLIC_POST_HOG_API_KEY || "", {
+        api_host: 'https://us.i.posthog.com',
+        autocapture: true,
+        capture_pageview: false,
+      });
+    }
+    return <>{children}</>;
   }
 
+  // 2. Mobile initialization
   return (
     <PostHogProvider
       apiKey={process.env.EXPO_PUBLIC_POST_HOG_API_KEY || ""}
@@ -79,3 +64,18 @@ const PostHogUniversalProvider = ({ children }: { children: React.ReactNode }) =
     </PostHogProvider>
   );
 };
+
+export default function RootLayout() {
+  useFrameworkReady();
+
+  return (
+    <PostHogUniversalProvider>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <AppContent />
+          <StatusBar style="dark" />
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </PostHogUniversalProvider>
+  );
+}
