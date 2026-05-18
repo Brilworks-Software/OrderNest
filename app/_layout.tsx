@@ -32,6 +32,7 @@ function AppContent() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
+      <Stack.Screen name="delete-account" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(manager)" />
       <Stack.Screen name="+not-found" />
